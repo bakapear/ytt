@@ -1,0 +1,32 @@
+{
+  "name": "ytt",
+  "version": "0.0.1",
+  "description": "youtube tools",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bakapear/ytt.git"
+  },
+  "keywords": [
+    "youtube",
+    "video",
+    "playlist",
+    "channel",
+    "download",
+    "query",
+    "search"
+  ],
+  "author": "bakapear",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bakapear/ytt/issues"
+  },
+  "homepage": "https://github.com/bakapear/ytt#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "got": "^10.2.1"
+  }
+}
