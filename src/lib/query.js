@@ -30,7 +30,7 @@ module.exports = async function (query = '', opts = {}) {
     let list = $('.item-section>li')
     for (let i = 0; i < list.length; i++) {
       let item = $(list[i])
-      let banned = ['.search-refinements', '.branded-page-module-title-text']
+      let banned = ['.search-refinements', '.branded-page-module-title-text', '.sidebar']
       if (banned.some(x => item.find(x)[0])) continue
       let type = 'video'
       switch (item.find('.accessible-description').text().trim()) {
