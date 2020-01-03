@@ -1,12 +1,12 @@
-let got = require('got')
+let dp = require('despair')
 let util = require('./util.js')
 let cheerio = require('cheerio')
 
 module.exports = async function (id = '', skip = false) {
-  let body = await got('playlist', {
-    prefixUrl: util.base,
+  let body = await dp('playlist', {
+    base: util.base,
     headers: { 'accept-language': 'en-US' },
-    searchParams: {
+    query: {
       disable_polymer: 1,
       list: id
     }
@@ -35,7 +35,7 @@ module.exports = async function (id = '', skip = false) {
     }
   }
   let addAllVideos = async (next) => {
-    let body = await got(util.base + next, { headers: { 'accept-language': 'en-US' } }).json()
+    let body = await dp(util.base + next, { headers: { 'accept-language': 'en-US' } }).json()
     $('#pl-video-table>tbody').append(body.content_html)
     let more = body.load_more_widget_html
     if (more) await addAllVideos(util.sub(more, '/browse_ajax', 0, '"', 0))

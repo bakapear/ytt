@@ -1,4 +1,4 @@
-let got = require('got')
+let dp = require('despair')
 let util = require('./util.js')
 
 module.exports = async function (id = '') {
@@ -66,7 +66,7 @@ function formatResponse (data, fn) {
 
 async function getPlayerData (id) {
   let url = await getPlayerUrl(id)
-  let body = await got(url).text()
+  let body = await dp(url).text()
   return {
     sts: util.sub(body, ',sts:', 5, ','),
     fn: findCipherFunctions(body)
@@ -74,8 +74,8 @@ async function getPlayerData (id) {
 }
 
 async function getPlayerUrl (id) {
-  let body = await got('embed/' + id, {
-    prefixUrl: util.base,
+  let body = await dp('embed/' + id, {
+    base: util.base,
     headers: { 'accept-language': 'en_US' }
   }).text()
   return util.base + util.sub(body, '/yts/jsbin/player', 0, 'base.js', 7)
@@ -94,9 +94,9 @@ async function getVideoData (id, sts) {
 }
 
 async function getVideoInfo (id, sts) {
-  let body = await got('get_video_info', {
-    prefixUrl: util.base,
-    searchParams: {
+  let body = await dp('get_video_info', {
+    base: util.base,
+    query: {
       video_id: id,
       eurl: 'https://youtube.googleapis.com/v/' + id,
       ps: 'default',

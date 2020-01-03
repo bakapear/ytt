@@ -1,4 +1,4 @@
-let got = require('got')
+let dp = require('despair')
 let util = require('./util.js')
 let playlist = require('./playlist.js')
 
@@ -12,14 +12,15 @@ module.exports = async function (...args) {
   } else {
     id = args.join(',')
   }
-  let body = await got('watch_videos', {
-    prefixUrl: util.base,
-    searchParams: {
+  let body = await dp('watch_videos', {
+    base: util.base,
+    headers: { 'accept-language': 'en-US' },
+    query: {
       disable_polymer: 1,
       video_ids: id
     }
   }).text()
-  let playlistId = /(?<=list=).*?(?=["&])/.exec(util.sub(body, 'rel="alternate"', 0, '>', 0))[0]
+  let playlistId = util.sub(body, 'data-full-list-id="', 19, '"')
   let pl = await playlist(playlistId)
   if (mult) return pl
   for (let i = 0; i < pl.items.length; i++) {

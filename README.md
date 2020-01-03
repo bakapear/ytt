@@ -4,6 +4,7 @@ This package provides youtube functions without needing an API key for any of th
 
 ### How to use
 ```js
+let ytt = require("ytt")
 ytt.format('https://www.youtube.com/watch?v=wOLiEu7275E') // gets id from video or playlist (sync)
 ytt.valid('blablablala') // checks if video or playlist is accessable
 ytt.query('duck do quack') // gets basic video/playlist/channel info of query

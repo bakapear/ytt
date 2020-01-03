@@ -1,4 +1,4 @@
-let got = require('got')
+let dp = require('despair')
 let util = require('./util.js')
 let cheerio = require('cheerio')
 
@@ -17,10 +17,10 @@ module.exports = async function (query = '', opts = {}) {
     items: []
   }
   let repeat = async (sp = '') => {
-    let body = await got('results', {
-      prefixUrl: util.base,
+    let body = await dp('results', {
+      base: util.base,
       headers: { 'accept-language': 'en-US' },
-      searchParams: {
+      query: {
         disable_polymer: 1,
         search_query: query,
         sp: sp
@@ -30,7 +30,7 @@ module.exports = async function (query = '', opts = {}) {
     let list = $('.item-section>li')
     for (let i = 0; i < list.length; i++) {
       let item = $(list[i])
-      let banned = ['.search-refinements', '.branded-page-module-title-text', '.sidebar']
+      let banned = ['.spell-correction', '.search-refinements', '.branded-page-module-title-text']
       if (banned.some(x => item.find(x)[0])) continue
       let type = 'video'
       switch (item.find('.accessible-description').text().trim()) {
@@ -83,6 +83,7 @@ module.exports = async function (query = '', opts = {}) {
           delete out.views
           delete out.duration
           delete out.time
+          if (!item.find('.yt-lockup-byline>a')[0]) continue
           out.author = {
             name: item.find('.yt-lockup-byline>a').text().trim(),
             url: util.base + item.find('.yt-lockup-byline>a')[0].attribs['href']
