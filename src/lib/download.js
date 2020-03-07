@@ -4,9 +4,6 @@ let util = require('./util.js')
 module.exports = async function (id = '') {
   let info = await getPlayerData(id)
   let data = await getVideoData(id, info.sts)
-  if (!data.player_response || !data.player_response.videoDetails) {
-    data = { status: 'fail', errorcode: 2, reason: 'Invalid parameters.' }
-  }
   if (data.status !== 'ok') {
     data.reason = decodeStr(data.reason)
     throw new Error(data.reason)
@@ -78,16 +75,18 @@ async function getPlayerUrl (id) {
     base: util.base,
     headers: { 'accept-language': 'en_US' }
   }).text()
-  return util.base + util.sub(body, '/yts/jsbin/player', 0, 'base.js', 7)
+  return util.base + util.sub(body, 'src="/s/player/', 5, 'base.js', 7)
 }
 
 function findCipherFunctions (js) {
+  js = js.substr(js.indexOf('a=a.split("");var') + 1)
   let top = util.sub(js, 'a=a.split("")', -15, '};', 1)
   let side = util.sub(js, `var ${util.sub(top, 'a=a.split("")', 14, '(').split('.')[0]}`, 0, '};', 2)
   return eval(side + top) // eslint-disable-line no-eval
 }
 
 async function getVideoData (id, sts) {
+  if (sts === 'f') sts = ''
   let data = await getVideoInfo(id, sts)
   data = parseData(data)
   return data
