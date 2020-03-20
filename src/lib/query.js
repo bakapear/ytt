@@ -4,12 +4,13 @@ let cheerio = require('cheerio')
 
 let banned = ['.spell-correction', '.search-refinements', '.branded-page-module-title-text']
 
+let filters = {
+  video: 'EgIQAQ%3D%3D',
+  channel: 'EgIQAg%3D%3D',
+  playlist: 'EgIQAw%3D%3D'
+}
+
 module.exports = async function (query = '', opts = {}) {
-  let filters = {
-    video: 'EgIQAQ%3D%3D',
-    channel: 'EgIQAg%3D%3D',
-    playlist: 'EgIQAw%3D%3D'
-  }
   let filter = filters[opts.filter] || null
   let res = {
     type: 'query',
