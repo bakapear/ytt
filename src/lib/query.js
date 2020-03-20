@@ -2,6 +2,8 @@ let dp = require('despair')
 let util = require('./util.js')
 let cheerio = require('cheerio')
 
+let banned = ['.spell-correction', '.search-refinements', '.branded-page-module-title-text']
+
 module.exports = async function (query = '', opts = {}) {
   let filters = {
     video: 'EgIQAQ%3D%3D',
@@ -30,7 +32,6 @@ module.exports = async function (query = '', opts = {}) {
     let list = $('.item-section>li')
     for (let i = 0; i < list.length; i++) {
       let item = $(list[i])
-      let banned = ['.spell-correction', '.search-refinements', '.branded-page-module-title-text']
       if (banned.some(x => item.find(x)[0])) continue
       let type = 'video'
       switch (item.find('.accessible-description').text().trim()) {
