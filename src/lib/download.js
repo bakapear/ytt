@@ -71,11 +71,14 @@ async function getPlayerData (id) {
 }
 
 async function getPlayerUrl (id) {
-  let body = await dp('embed/' + id, {
-    base: util.base,
-    headers: { 'accept-language': 'en_US' }
+  let body = await dp('https://youtube.com/watch', {
+    query: {
+      v: id,
+      hl: 'en',
+      bpctr: Math.ceil(Date.now() / 1000)
+    }
   }).text()
-  return util.base + util.sub(body, 'src="/s/player/', 5, 'base.js', 7)
+  return util.base + util.sub(body, '/yts/jsbin/player', 0, 'base.js', 7)
 }
 
 function findCipherFunctions (js) {
