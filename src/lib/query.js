@@ -31,6 +31,7 @@ module.exports = async function (query = '', opts = {}) {
     }).text()
     let $ = hy(body)
     let list = $('.item-section>li')
+    if (list.text().indexOf('No results for') >= 0) return res
     for (let i = 0; i < list.length; i++) {
       let item = $(list[i])
       if (banned.some(x => item.find(x)[0])) continue
