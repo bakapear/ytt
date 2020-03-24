@@ -1,6 +1,6 @@
 let dp = require('despair')
+let hy = require('honesty')
 let util = require('./util.js')
-let cheerio = require('cheerio')
 
 module.exports = async function (id = '', skip = false) {
   let body = await dp('playlist', {
@@ -11,17 +11,19 @@ module.exports = async function (id = '', skip = false) {
       list: id
     }
   }).text()
-  let $ = cheerio.load(body)
+  body = body.replace(/<div class="more-menu-wrapper">/g, '')
+  let $ = hy(body)
   if (!$('.pl-header-title')[0]) return { error: 'No playlist id found: ' + id }
+  let details = $('.pl-header-details>li')
   let res = {
     type: 'playlist',
     id: id,
     url: util.base + '/playlist?list=' + id,
-    name: $('.pl-header-title').text().trim(),
-    description: $('.pl-header-description-text')[0] ? $('.pl-header-description-text').text().trim() : '',
+    name: $('.pl-header-title').text(true),
+    description: $('.pl-header-description-text')[0] ? $('.pl-header-description-text').text(true) : '',
     author: null,
-    size: util.formatStat($('.pl-header-details>li:nth-child(2)').text().trim(), 'videos'),
-    views: util.formatStat($('.pl-header-details>li:nth-child(3)').text().trim(), 'views'),
+    size: util.formatStat($(details[1]).text(true), 'videos'),
+    views: util.formatStat($(details[2]).text(true), 'views'),
     thumbnail: util.getThumb($('.pl-header-thumb>img')[0].attribs['src']),
     duration: 0,
     time: '',
@@ -29,14 +31,18 @@ module.exports = async function (id = '', skip = false) {
   }
   if ($('.qualified-channel-title-text>a')[0]) {
     res.author = {
-      name: $('.qualified-channel-title-text>a').text().trim(),
+      name: $('.qualified-channel-title-text>a').text(true),
       img: $('.channel-header-profile-image')[0].attribs['src'],
       url: util.base + $('.qualified-channel-title-text>a')[0].attribs['href']
     }
   }
   let addAllVideos = async (next) => {
     let body = await dp(util.base + next, { headers: { 'accept-language': 'en-US' } }).json()
-    $('#pl-video-table>tbody').append(body.content_html)
+    if (body.reload === 'now') {
+      await addAllVideos(next)
+      return
+    }
+    $('#pl-video-table>tbody').append(body.content_html.replace(/<div class="more-menu-wrapper">/g, ''))
     let more = body.load_more_widget_html
     if (more) await addAllVideos(util.sub(more, '/browse_ajax', 0, '"', 0))
   }
@@ -59,10 +65,10 @@ module.exports = async function (id = '', skip = false) {
     }
     if (!unavailable) {
       out.author = {
-        name: item.find('.pl-video-owner>a').text().trim(),
+        name: item.find('.pl-video-owner>a').text(true),
         url: util.base + item.find('.pl-video-owner>a')[0].attribs['href']
       }
-      out.time = item.find('.timestamp').text().trim()
+      out.time = item.find('.timestamp').text(true)
     }
     out.duration = util.hmsToMs(out.time)
     res.duration += out.duration

@@ -1,6 +1,6 @@
 let dp = require('despair')
+let hy = require('honesty')
 let util = require('./util.js')
-let cheerio = require('cheerio')
 
 let banned = ['.spell-correction', '.search-refinements', '.branded-page-module-title-text']
 
@@ -29,13 +29,13 @@ module.exports = async function (query = '', opts = {}) {
         sp: sp
       }
     }).text()
-    let $ = cheerio.load(body)
+    let $ = hy(body)
     let list = $('.item-section>li')
     for (let i = 0; i < list.length; i++) {
       let item = $(list[i])
       if (banned.some(x => item.find(x)[0])) continue
       let type = 'video'
-      switch (item.find('.accessible-description').text().trim()) {
+      switch (item.find('.accessible-description').text(true)) {
         case '- Playlist': {
           type = 'playlist'
           break
@@ -50,7 +50,7 @@ module.exports = async function (query = '', opts = {}) {
         id: null,
         url: util.base + item.find('.yt-lockup-title>a')[0].attribs['href'],
         name: item.find('.yt-lockup-title>a')[0].attribs['title'],
-        description: item.find('.yt-lockup-description').text().trim(),
+        description: item.find('.yt-lockup-description').text(true),
         author: null,
         size: null,
         views: null,
@@ -62,13 +62,13 @@ module.exports = async function (query = '', opts = {}) {
         case 'video': {
           delete out.size
           out.id = item.find('.yt-lockup')[0].attribs['data-context-item-id']
-          out.time = item.find('.video-time').text().trim()
+          out.time = item.find('.video-time').text(true)
           out.duration = util.hmsToMs(out.time)
           out.author = {
-            name: item.find('.yt-lockup-byline>a').text().trim(),
+            name: item.find('.yt-lockup-byline>a').text(true),
             url: util.base + item.find('.yt-lockup-byline>a')[0].attribs['href']
           }
-          out.views = util.formatStat(item.find('.yt-lockup-meta-info>li:nth-child(2)').text().trim(), 'views')
+          out.views = util.formatStat($(item.find('.yt-lockup-meta-info>li')[1]).text(true), 'views')
           break
         }
         case 'channel': {
@@ -77,7 +77,7 @@ module.exports = async function (query = '', opts = {}) {
           delete out.views
           delete out.duration
           delete out.time
-          out.size = util.formatStat(item.find('.yt-lockup-meta-info>li').text().trim(), 'videos')
+          out.size = util.formatStat(item.find('.yt-lockup-meta-info>li').text(true), 'videos')
           break
         }
         case 'playlist': {
@@ -87,12 +87,12 @@ module.exports = async function (query = '', opts = {}) {
           delete out.time
           if (!item.find('.yt-lockup-byline>a')[0]) continue
           out.author = {
-            name: item.find('.yt-lockup-byline>a').text().trim(),
+            name: item.find('.yt-lockup-byline>a').text(true),
             url: util.base + item.find('.yt-lockup-byline>a')[0].attribs['href']
           }
           out.id = out.url.substr(out.url.indexOf('&list=') + 6)
           out.url = util.base + '/playlist?list=' + out.id
-          out.size = util.formatStat(item.find('.formatted-video-count-label').text().trim(), 'videos')
+          out.size = util.formatStat(item.find('.formatted-video-count-label').text(true), 'videos')
           break
         }
       }
