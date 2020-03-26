@@ -97,10 +97,12 @@ module.exports = async function (query = '', opts = {}) {
           break
         }
       }
-      let img = item.find('.yt-thumb-simple>img')[0].attribs
-      if (img['data-thumb']) out.thumbnail = util.getThumb(img['data-thumb'])
-      else out.thumbnail = util.getThumb(img['src'])
-      if (out.thumbnail.startsWith('//')) out.thumbnail = 'https:' + out.thumbnail
+      let img = item.find('.yt-thumb-simple>img')[0]
+      if (img) {
+        img = img.attribs['data-thumb'] || img.attribs['src']
+        out.thumbnail = util.getThumb(img)
+        if (out.thumbnail.startsWith('//')) out.thumbnail = 'https:' + out.thumbnail
+      } else out.thumbnail = `https://i3.ytimg.com/${out.id}/mqdefault.jpg`
       res.items.push(out)
     }
     let more = $('.search-pager')[0]

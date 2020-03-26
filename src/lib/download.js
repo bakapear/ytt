@@ -93,14 +93,15 @@ function findCipherFunctions (js) {
   return eval(side + top) // eslint-disable-line no-eval
 }
 
-async function getVideoData (id, sts) {
+async function getVideoData (id, sts, detail) {
   if (sts === 'f') sts = ''
-  let data = await getVideoInfo(id, sts)
+  let data = await getVideoInfo(id, sts, detail)
   data = parseData(data)
+  if (!data.player_response.streamingData) data = await getVideoData(id, sts, true)
   return data
 }
 
-async function getVideoInfo (id, sts) {
+async function getVideoInfo (id, sts, detail) {
   let body = await dp('get_video_info', {
     base: util.base,
     query: {
@@ -109,7 +110,7 @@ async function getVideoInfo (id, sts) {
       ps: 'default',
       gl: 'US',
       hl: 'en',
-      el: 'embedded',
+      el: detail ? 'detailpage' : 'embedded',
       sts: sts
     }
   }).text()
