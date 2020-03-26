@@ -70,7 +70,7 @@ async function getPlayerData (id) {
   }
 }
 
-async function getPlayerUrl (id) {
+async function getPlayerUrl (id, retries = 3) {
   let body = await dp('https://youtube.com/watch', {
     query: {
       v: id,
@@ -78,7 +78,12 @@ async function getPlayerUrl (id) {
       bpctr: Math.ceil(Date.now() / 1000)
     }
   }).text()
-  return util.base + util.sub(body, '/yts/jsbin/player', 0, 'base.js', 7)
+  let url = util.base + util.sub(body, '/yts/jsbin/player', 0, 'base.js', 7)
+  if (url.indexOf('/yts/jsbin/player') < 0) {
+    if (retries < 0) throw new Error('Could not retrieve player url!')
+    url = await getPlayerUrl(id, --retries)
+  }
+  return url
 }
 
 function findCipherFunctions (js) {
