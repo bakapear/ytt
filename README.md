@@ -10,7 +10,7 @@ ytt.format('https://www.youtube.com/watch?v=wOLiEu7275E') // returns object with
 ytt.valid('blablablala') // checks if video or playlist is accessable
 ytt.query('duck do quack') // gets basic video/playlist/channel info of query
 ytt.query('duck do quack', { filter: 'video' }) // above but finds videos only
-ytt.query('duck do quack', { filter: 'channel' }) // above but finds videos only
+ytt.query('duck do quack', { filter: 'channel' }) // above but finds channels only
 ytt.query('duck do quack', { filter: 'playlist' }) // above but finds playlists only
 ytt.query('duck do quack', { num: 35 }) // gets basic video/channel/playlist info of query, searching max 35 items (default is first page only ~20)
 ytt.video('wOLiEu7275E') // get basic video info
