@@ -63,7 +63,8 @@ async function getPlayerData (id) {
 }
 
 async function getPlayerUrl (id, retries = 3) {
-  let body = await dp('https://youtube.com/watch', {
+  let body = await dp('watch', {
+    base: util.base,
     query: {
       v: id,
       hl: 'en',
