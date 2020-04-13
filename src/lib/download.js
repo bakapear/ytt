@@ -74,8 +74,8 @@ async function getPlayerUrl (id, retries = 3) {
       bpctr: Math.ceil(Date.now() / 1000)
     }
   }).text()
-  let url = util.base + util.sub(body, '/yts/jsbin/player', 0, 'base.js', 7)
-  if (url.indexOf('/yts/jsbin/player') < 0) {
+  let url = util.base + util.sub(body, '/s/player/', 0, 'base.js', 7)
+  if (url.indexOf('/s/player/') < 0) {
     if (retries < 0) throw new Error('Could not retrieve player url!')
     url = await getPlayerUrl(id, --retries)
   }
