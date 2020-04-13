@@ -7,20 +7,16 @@ module.exports = async function (id = '') {
   return formatResponse(data, info.fn)
 }
 
-function decodeStr (str) {
-  if (str) return str.replace(/\+/g, ' ')
-}
-
 function formatResponse (data, fn) {
   let details = data.player_response.videoDetails
   let res = {
-    error: decodeStr(data.player_response.playabilityStatus.reason),
+    error: util.decodeStr(data.player_response.playabilityStatus.reason),
     videoId: details.videoId,
     channelId: details.channelId,
-    title: decodeStr(details.title),
-    description: decodeStr(details.shortDescription),
-    author: decodeStr(details.author),
-    keywords: details.keywords ? details.keywords.map(x => decodeStr(x)) : [],
+    title: util.decodeStr(details.title),
+    description: util.decodeStr(details.shortDescription),
+    author: util.decodeStr(details.author),
+    keywords: details.keywords ? details.keywords.map(x => util.decodeStr(x)) : [],
     viewCount: details.viewCount,
     isPrivate: details.isPrivate,
     isLiveContent: details.isLiveContent,
@@ -34,7 +30,7 @@ function formatResponse (data, fn) {
   if (!res.error) delete res.error
   res.formats = res.formats.map(x => {
     if (x.s) x.url += `&${x.sp}=` + fn(x.s)
-    x.mimeType = decodeStr(x.mimeType)
+    x.mimeType = util.decodeStr(x.mimeType)
     let res = {
       itag: x.itag,
       format: x.mimeType.split(';')[0].split('/')[1],
@@ -93,7 +89,7 @@ async function getVideoData (id, sts, detail) {
   if (sts === 'f') sts = ''
   let data = await getVideoInfo(id, sts, detail)
   data = parseData(data)
-  if (data.status !== 'ok') throw new Error(decodeStr(data.reason))
+  if (data.status !== 'ok') throw new Error(util.decodeStr(data.reason))
   if (!detail && !data.player_response.streamingData) data = await getVideoData(id, sts, true)
   return data
 }
