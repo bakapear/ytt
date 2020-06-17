@@ -21,6 +21,9 @@ module.exports = {
     return t.join(':')
   },
   getThumb: x => x.indexOf('hqdefault') >= 0 ? `https://i3.ytimg.com/vi/${x.match(/vi\/(.*?)\//)[1]}/mqdefault.jpg` : x,
-  formatStat: (x, y) => Number(x.substr(0, x.indexOf(y)).trim().replace(/,/g, '')),
+  formatStat: (x, y) => {
+    x = x.replace('K', '000').replace('M', '000000').replace(/\./g, ',')
+    return Number(x.substr(0, x.indexOf(y)).trim().replace(/,/g, ''))
+  },
   decodeStr: (x = '') => x.replace(/\+/g, ' ')
 }
