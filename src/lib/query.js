@@ -34,6 +34,7 @@ module.exports = async function (query = '', opts = {}) {
       let list = body.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents
       for (let item of list) {
         let type = Object.keys(item)[0]
+        if (!['videoRenderer', 'playlistRenderer', 'channelRenderer'].includes(type)) continue
         let out = {
           type: type.replace('Renderer', ''),
           id: null,
