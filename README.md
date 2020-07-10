@@ -41,12 +41,12 @@ await ytt.playlist('PLYqMopOHwQ8hm6tCpbJavL_izixM76SyX', { full: true })
 // gets all videos from playlist (only available for playlist & ignores min/max options)
 
 let playlist = await ytt.playlist('PLYqMopOHwQ8hm6tCpbJavL_izixM76SyX')
-console.log(playlist.videos.length) // 100
-if(playlist.videos.continuation) await playlist.videos.more()
-console.log(playlist.videos.length) // 200
+console.log(playlist.items.length) // 100
+if(playlist.items.continuation) await playlist.items.more()
+console.log(playlist.items.length) // 200
 
-await ytt.query('duck noises', { max: 5 })
-// gets a maximum of 5 query results 
+await ytt.query('duck noises', { filter: 'video', max: 5 })
+// gets a maximum of 5 query results filtered by video
 
 let search = await ytt.query('ducks making very weird noises', { min: 50 })
 console.log(search.items.length) // 66
