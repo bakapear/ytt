@@ -1,8 +1,8 @@
 {
   "name": "ytt",
-  "version": "1.0.10",
-  "description": "youtube tools",
-  "main": "src/index.js",
+  "version": "2.0.0",
+  "description": "YouTubeTools",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,12 +12,12 @@
   },
   "keywords": [
     "youtube",
-    "video",
-    "playlist",
-    "channel",
     "download",
+    "video",
+    "channel",
+    "playlist",
     "query",
-    "search"
+    "api"
   ],
   "author": "bakapear",
   "license": "MIT",
@@ -26,7 +26,6 @@
   },
   "homepage": "https://github.com/bakapear/ytt#readme",
   "dependencies": {
-    "despair": "^2.1.2",
-    "honesty": "^1.2.0"
+    "despair": "^2.1.2"
   }
 }
