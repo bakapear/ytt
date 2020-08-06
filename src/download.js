@@ -33,10 +33,10 @@ async function getPlayerData (id) {
 }
 
 function getCipherFunction (str) {
-  let keys = ['a=a.split("")', '};', 'var ', '(']
+  let keys = ['a=a.split("")', '};', 'var ', '(', '=']
   let js = util.between(str, `${keys[0]};${keys[2]}`)
   let top = util.between(js, keys[0], keys[1], 1, -28)
-  let fn = keys[2] + util.between(top, keys[0], keys[3], 10, 1).split('.')[0]
+  let fn = keys[2] + util.between(top, keys[0], keys[3], 10, 1).split('.')[0] + keys[4]
   let side = util.between(js, fn, keys[1], 2, -fn.length)
   return eval(side + top) // eslint-disable-line no-eval
 }
