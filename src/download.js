@@ -7,12 +7,9 @@ module.exports = async function (id) {
   if (!await valid(id, 'video')) throw util.error(`Invalid video ID: '${id}'`)
   let player = await getPlayerData(id)
   let data = await getVideoData(id, player.sts)
-  let formats = decipherFormats([
-    ...Object.values(data.streamingData.formats),
-    ...Object.values(data.streamingData.adaptiveFormats)
-  ], player.fn)
-  let response = builder.makeVideoInfoObject(data, formats)
-  return response
+  let formats = Object.values(data.streamingData.adaptiveFormats)
+  if (data.streamingData.formats) formats.push(...Object.values(data.streamingData.formats))
+  return builder.makeVideoInfoObject(data, decipherFormats(formats, player.fn))
 }
 
 async function getPlayerData (id) {
