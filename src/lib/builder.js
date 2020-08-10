@@ -7,7 +7,7 @@ function makePlaylistObject (data) {
   let micro = data.microformat.microformatDataRenderer
   let stats = data.sidebar.playlistSidebarRenderer.items[0].playlistSidebarPrimaryInfoRenderer.stats.map(x => util.text(x))
   let owner = data.sidebar.playlistSidebarRenderer.items[1].playlistSidebarSecondaryInfoRenderer.videoOwner
-  let url = owner ? owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.canonicalBaseUrl : null
+  let url = owner ? owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.canonicalBaseUrl : ''
   let list = data.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer
   let formatItems = x => {
     let items = []
@@ -130,15 +130,12 @@ function makeQueryObject (data) {
         case 'videoRenderer': {
           let item = x[i].videoRenderer
           let url = item.shortBylineText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url
-          if (!item.viewCountText && item.badges.find(x => x.metadataBadgeRenderer.label === 'LIVE NOW')) {
-            item.live = true
-          }
           items.push(new YoutubeVideo({
             id: item.videoId,
-            type: item.live ? 'live' : 'public',
+            type: 'public',
             title: util.text(item.title),
             description: item.descriptionSnippet ? util.text(item.descriptionSnippet) : undefined,
-            views: !item.live ? (util.stat(util.text(item.viewCountText), 'view') || 0) : undefined,
+            views: item.viewCountText ? (util.stat(util.text(item.viewCountText), 'view') || 0) : undefined,
             date: item.publishedTimeText ? util.text(item.publishedTimeText) : undefined,
             duration: item.lengthText ? util.hmsToMs(util.text(item.lengthText)) : undefined,
             thumbnails: new YoutubeThumbnails(item.thumbnail.thumbnails),
