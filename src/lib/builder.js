@@ -130,12 +130,15 @@ function makeQueryObject (data) {
         case 'videoRenderer': {
           let item = x[i].videoRenderer
           let url = item.shortBylineText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url
+          if (!item.viewCountText && item.badges.find(x => x.metadataBadgeRenderer.label === 'LIVE NOW')) {
+            item.live = true
+          }
           items.push(new YoutubeVideo({
             id: item.videoId,
-            type: 'public',
+            type: item.live ? 'live' : 'public',
             title: util.text(item.title),
             description: item.descriptionSnippet ? util.text(item.descriptionSnippet) : undefined,
-            views: util.stat(util.text(item.viewCountText), 'view') || 0,
+            views: !item.live ? (util.stat(util.text(item.viewCountText), 'view') || 0) : undefined,
             date: item.publishedTimeText ? util.text(item.publishedTimeText) : undefined,
             duration: item.lengthText ? util.hmsToMs(util.text(item.lengthText)) : undefined,
             thumbnails: new YoutubeThumbnails(item.thumbnail.thumbnails),
