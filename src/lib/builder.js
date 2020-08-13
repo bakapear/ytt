@@ -215,7 +215,7 @@ function makeVideoInfoObject (data, formats) {
     author: new YoutubeChannel({
       id: details.channelId,
       vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
-      title: details.author
+      title: details.author.replace(/\+/g, ' ')
     })
   })
   formats = new YoutubeFormats(formats.map(x => {
