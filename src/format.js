@@ -10,7 +10,7 @@ module.exports = value => {
   }
   if (value.match(/^([^"&?/ ]*)$/)) {
     if (value.length === 11) return { type: 'video', value }
-    if (value.length === 34 || value.length === 26) return { type: 'playlist', value }
+    if (value.length === 34 || value.length === 26 || value.length === 18) return { type: 'playlist', value }
   }
   return { type: 'query', value }
 }
