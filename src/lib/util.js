@@ -21,7 +21,11 @@ let main = {
     if (x[2]) r += x[2] * 3600000
     return r
   },
-  parse: x => main.between(x, 'window["ytInitialData"] = ', '};', 1),
+  parse: x => {
+    let pointer = 'window["ytInitialData"] = '
+    if (x.indexOf(pointer) < 0) pointer = 'var ytInitialData = '
+    return main.between(x, pointer, '};', 1)
+  },
   removeEmpty: x => {
     Object.keys(x).forEach(function (key) {
       if (x[key] && typeof x[key] === 'object') main.removeEmpty(x[key])
