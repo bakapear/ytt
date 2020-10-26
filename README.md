@@ -27,7 +27,7 @@ await ytt.playlist('PLToKALUfVcJDbcWImpZ-IQxaTkUtbprAh')
 await ytt.query('funny duck compilation')
 // YoutubeQuery
 
-await ytt.download('eL2nfko5oNk')
+await ytt.download('VIjSkkmhCTM')
 // { info: YoutubeVideo, formats: YoutubeFormats }
 ```
 
