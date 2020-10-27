@@ -33,6 +33,10 @@ let main = {
       if (typeof x[key] === 'object' && Object.keys(x[key]).length === 0 && !(x[key] instanceof Date)) delete x[key]
     })
     return x
+  },
+  findWithKey: (x, key) => {
+    let a = x.find(y => y[key])
+    return a ? a[key] : null
   }
 }
 

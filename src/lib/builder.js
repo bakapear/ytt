@@ -123,21 +123,10 @@ function makeVideoObject (data) {
 function makeQueryObject (data) {
   let query = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.subMenu.searchSubMenuRenderer.groups[4].searchFilterGroupRenderer.filters[1].searchFilterRenderer.navigationEndpoint.searchEndpoint.query
   let sections = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
-  // it appears that the last interesting section is the second to last
-  // the last one is a continuationItemRenderer
-  let main = sections[sections.length - 2].itemSectionRenderer
+  let main = util.findWithKey(sections, 'itemSectionRenderer')
 
-  let formatSections = sections => {
+  let formatItems = x => {
     let items = []
-    for (let section of sections) {
-      if (section.itemSectionRenderer) {
-        formatItems(section.itemSectionRenderer.contents, items)
-      }
-    }
-    return items
-  }
-
-  let formatItems = (x, items) => {
     for (let i = 0; i < x.length; i++) {
       switch (Object.keys(x[i])[0]) {
         case 'videoRenderer': {
@@ -200,11 +189,11 @@ function makeQueryObject (data) {
     query: query,
     results: Number(data.estimatedResults),
     corrected: (main.contents.length && main.contents[0].didYouMeanRenderer) ? util.text(main.contents[0].didYouMeanRenderer.correctedQuery) : undefined,
-    items: formatSections(sections),
+    items: formatItems(main.contents),
     continuation: main.continuations ? main.continuations[0].nextContinuationData.continuation : null,
     fetch: async x => {
       let res = await fetchMoreQuery(query, x)
-      return { continuation: res.continuation, items: formatItems(res.items, []) }
+      return { continuation: res.continuation, items: formatItems(res.items) }
     }
   })
   search = util.removeEmpty(search)
