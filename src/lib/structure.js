@@ -10,20 +10,7 @@ function YoutubePlaylist (data) {
   this.thumbnails = data.thumbnails
   this.author = data.author
   this.items = data.items
-  if (data.items) {
-    Object.defineProperty(this.items, 'more', {
-      enumerable: false,
-      value: async () => {
-        if (!this.items.continuation) return false
-        let data = await this.fetch(this.items.continuation)
-        this.items.continuation = data.continuation
-        if (data.items) this.items.push(...data.items)
-        return true
-      }
-    })
-    if (data.continuation) Object.defineProperty(this.items, 'continuation', { enumerable: false, writable: true, value: data.continuation })
-    if (data.fetch) Object.defineProperty(this, 'fetch', { enumerable: false, value: data.fetch })
-  }
+  if (data.items) more.call(this, data)
 }
 
 function YoutubeChannel (data) {
@@ -65,20 +52,7 @@ function YoutubeQuery (data) {
     corrected: data.corrected
   }
   this.items = data.items
-  if (data.items) {
-    Object.defineProperty(this.items, 'more', {
-      enumerable: false,
-      value: async () => {
-        if (!this.items.continuation) return false
-        let data = await this.fetch(this.items.continuation)
-        this.items.continuation = data.continuation
-        if (data.items) this.items.push(...data.items)
-        return true
-      }
-    })
-    if (data.continuation) Object.defineProperty(this.items, 'continuation', { enumerable: false, writable: true, value: data.continuation })
-    if (data.fetch) Object.defineProperty(this, 'fetch', { enumerable: false, value: data.fetch })
-  }
+  if (data.items) more.call(this, data)
 }
 
 function YoutubeThumbnail (data) {
@@ -113,6 +87,21 @@ function YoutubeFormat (data) {
 function YoutubeFormats (data) {
   let arr = data.map(x => new YoutubeFormat(x))
   return arr
+}
+
+function more (data) {
+  Object.defineProperty(this.items, 'more', {
+    enumerable: false,
+    value: async () => {
+      if (!this.items.continuation) return false
+      let data = await this.fetch(this.items.continuation)
+      this.items.continuation = data.continuation
+      if (data.items) this.items.push(...data.items)
+      return true
+    }
+  })
+  if (data.continuation) Object.defineProperty(this.items, 'continuation', { enumerable: false, writable: true, value: data.continuation })
+  if (data.fetch) Object.defineProperty(this, 'fetch', { enumerable: false, value: data.fetch })
 }
 
 module.exports = { YoutubePlaylist, YoutubeChannel, YoutubeVideo, YoutubeQuery, YoutubeThumbnails, YoutubeFormats }
