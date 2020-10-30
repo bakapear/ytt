@@ -1,6 +1,6 @@
 {
   "name": "ytt",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "YouTubeTools",
   "main": "index.js",
   "scripts": {
