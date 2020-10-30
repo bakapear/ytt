@@ -124,6 +124,7 @@ function makeQueryObject (data) {
   let query = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.subMenu.searchSubMenuRenderer.groups[4].searchFilterGroupRenderer.filters[1].searchFilterRenderer.navigationEndpoint.searchEndpoint.query
   let sections = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
   let main = util.findWithKey(sections, 'itemSectionRenderer')
+  let continuation = util.findWithKey(sections, 'continuationItemRenderer')
 
   let formatItems = x => {
     let items = []
@@ -190,7 +191,7 @@ function makeQueryObject (data) {
     results: Number(data.estimatedResults),
     corrected: (main.contents.length && main.contents[0].didYouMeanRenderer) ? util.text(main.contents[0].didYouMeanRenderer.correctedQuery) : undefined,
     items: formatItems(main.contents),
-    continuation: main.continuations ? main.continuations[0].nextContinuationData.continuation : null,
+    continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
     fetch: async x => {
       let res = await fetchMoreQuery(query, x)
       return { continuation: res.continuation, items: formatItems(res.items) }
@@ -254,19 +255,30 @@ async function fetchMore (token) {
 }
 
 async function fetchMoreQuery (query, token) {
-  let body = await dp.post('results', {
+  let body = await dp.post('youtubei/v1/search', {
     base: util.base,
-    headers: {
-      'Accept-Language': 'en-US',
-      'X-YouTube-Client-Name': '1',
-      'X-YouTube-Client-Version': '2.20200701.03.01'
+    query: {
+      key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8' // public
     },
-    query: { search_query: query, continuation: token, pbj: 1 }
+    data: {
+      context: {
+        client: {
+          hl: 'en',
+          gl: 'US',
+          clientName: '1',
+          clientVersion: '2.20200701.03.01'
+        }
+      },
+      continuation: token
+    },
+    type: 'json'
   }).json()
-  body = body[1].response.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer
+  let sections = body.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems
+  let main = util.findWithKey(sections, 'itemSectionRenderer')
+  let continuation = util.findWithKey(sections, 'continuationItemRenderer')
   return {
-    continuation: body.continuations ? body.continuations[0].nextContinuationData.continuation : null,
-    items: body.contents
+    continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
+    items: main.contents
   }
 }
 
