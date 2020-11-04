@@ -37,6 +37,9 @@ let main = {
   findWithKey: (x, key) => {
     let a = x.find(y => y[key])
     return a ? a[key] : null
+  },
+  findLastWithKey: (x, key) => {
+    return main.findWithKey(x.slice().reverse(), key)
   }
 }
 
