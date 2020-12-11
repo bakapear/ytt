@@ -1,6 +1,6 @@
 let dp = require('despair')
 let util = require('./util')
-let { YoutubePlaylist, YoutubeChannel, YoutubeVideo, YoutubeQuery, YoutubeThumbnails, YoutubeFormats } = require('./structure')
+let { YoutubePlaylist, YoutubeChannel, YoutubeVideo, YoutubeQuery, YoutubeThumbnail, YoutubeFormats } = require('./structure')
 
 function makePlaylistObject (data) {
   let meta = data.metadata.playlistMetadataRenderer
@@ -31,7 +31,7 @@ function makePlaylistObject (data) {
         title: title,
         views: util.stat(item.title.accessibility.accessibilityData.label.split(' ').slice(-2).join(' '), 'view') || 0,
         duration: Number(item.lengthSeconds) * 1000,
-        thumbnails: new YoutubeThumbnails(item.thumbnail.thumbnails),
+        thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
         author: new YoutubeChannel({
           id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
           vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
@@ -48,13 +48,13 @@ function makePlaylistObject (data) {
     description: meta.description,
     views: util.stat(stats.find(x => x.indexOf('view') >= 0), 'view') || 0,
     size: util.stat(stats.find(x => x.indexOf('video') >= 0), 'video') || 0,
-    thumbnails: new YoutubeThumbnails(micro.thumbnail.thumbnails),
+    thumbnail: new YoutubeThumbnail(micro.thumbnail.thumbnails[0]),
     author: owner
       ? new YoutubeChannel({
           id: owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
           vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
           title: util.text(owner.videoOwnerRenderer.title),
-          thumbnails: new YoutubeThumbnails(owner.videoOwnerRenderer.thumbnail.thumbnails)
+          thumbnail: new YoutubeThumbnail(owner.videoOwnerRenderer.thumbnail.thumbnails[0])
         })
       : undefined,
     continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
@@ -82,12 +82,8 @@ function makeChannelObject (data) {
     subscribers: header.subscriberCountText ? util.stat(util.text(header.subscriberCountText), 'subscriber') : undefined,
     views: util.stat(util.text(full.viewCountText), 'view') || 0,
     date: util.text(full.joinedDateText).replace('Joined', '').trim(),
-    thumbnails: new YoutubeThumbnails([...meta.avatar.thumbnails, ...header.avatar.thumbnails]),
-    banners: {
-      desktop: new YoutubeThumbnails(header.banner.thumbnails),
-      tv: new YoutubeThumbnails(header.tvBanner.thumbnails),
-      mobile: new YoutubeThumbnails(header.mobileBanner.thumbnails)
-    }
+    thumbnail: new YoutubeThumbnail(meta.avatar.thumbnails[0]),
+    banner: new YoutubeThumbnail(header.banner.thumbnails[0])
   })
   channel = util.removeEmpty(channel)
   return channel
@@ -110,13 +106,13 @@ function makeVideoObject (data) {
     likes: util.stat(primary.videoActions.menuRenderer.topLevelButtons[0].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label, 'like') || 0,
     dislikes: util.stat(primary.videoActions.menuRenderer.topLevelButtons[1].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label, 'dislike') || 0,
     duration: util.hmsToMs(util.text(time)),
-    thumbnails: new YoutubeThumbnails(main.thumbnail.thumbnails),
+    thumbnail: new YoutubeThumbnail(main.thumbnail.thumbnails[0]),
     author: new YoutubeChannel({
       id: secondary.owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
       vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
       title: util.text(secondary.owner.videoOwnerRenderer.title),
       subscribers: util.stat(util.text(secondary.owner.videoOwnerRenderer.subscriberCountText), 'subscriber'),
-      thumbnails: new YoutubeThumbnails(secondary.owner.videoOwnerRenderer.thumbnail.thumbnails)
+      thumbnail: new YoutubeThumbnail(secondary.owner.videoOwnerRenderer.thumbnail.thumbnails[0])
     })
   })
   video = util.removeEmpty(video)
@@ -144,7 +140,7 @@ function makeQueryObject (data) {
             views: item.viewCountText ? (util.stat(util.text(item.viewCountText), 'view') || 0) : undefined,
             date: item.publishedTimeText ? util.text(item.publishedTimeText) : undefined,
             duration: item.lengthText ? util.hmsToMs(util.text(item.lengthText)) : undefined,
-            thumbnails: new YoutubeThumbnails(item.thumbnail.thumbnails),
+            thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
             author: new YoutubeChannel({
               id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
               vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
@@ -161,7 +157,7 @@ function makeQueryObject (data) {
             vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
             title: util.text(item.title),
             description: item.descriptionSnippet ? util.text(item.descriptionSnippet) : undefined,
-            thumbnails: new YoutubeThumbnails(item.thumbnail.thumbnails),
+            thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
             subscribers: item.subscriberCountText ? util.stat(util.text(item.subscriberCountText), 'subscriber') : undefined,
             size: item.videoCountText ? util.stat(util.text(item.videoCountText), 'video') : undefined
           }))
@@ -174,7 +170,7 @@ function makeQueryObject (data) {
             id: item.playlistId,
             type: 'public',
             title: util.text(item.title),
-            thumbnails: new YoutubeThumbnails(item.thumbnails[0].thumbnails),
+            thumbnail: new YoutubeThumbnail(item.thumbnails[0].thumbnails[0]),
             size: Number(item.videoCount),
             author: new YoutubeChannel({
               id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
@@ -215,7 +211,7 @@ function makeVideoInfoObject (data, formats) {
     type: micro.isUnlisted ? 'unlisted' : 'public',
     title: util.text(micro.title).replace(/\+/g, ' '),
     description: micro.description ? util.text(micro.description).replace(/\+/g, ' ') : undefined,
-    thumbnails: new YoutubeThumbnails(Object.values(details.thumbnail.thumbnails)),
+    thumbnail: new YoutubeThumbnail(Object.values(details.thumbnail.thumbnails)[0]),
     date: micro.publishDate,
     duration: Number(details.lengthSeconds) * 1000,
     views: Number(details.viewCount),

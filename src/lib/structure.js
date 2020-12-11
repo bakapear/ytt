@@ -7,7 +7,7 @@ function YoutubePlaylist (data) {
     views: data.views,
     videos: data.size
   }
-  this.thumbnails = data.thumbnails
+  this.thumbnail = data.thumbnail
   this.author = data.author
   this.items = data.items
   if (data.items) more.call(this, data)
@@ -24,8 +24,8 @@ function YoutubeChannel (data) {
     subscribers: data.subscribers,
     date: data.date
   }
-  this.thumbnails = data.thumbnails
-  this.banners = data.banners
+  this.thumbnail = data.thumbnail
+  this.banner = data.banner
 }
 
 function YoutubeVideo (data) {
@@ -41,7 +41,7 @@ function YoutubeVideo (data) {
     likes: data.likes,
     dislikes: data.dislikes
   }
-  this.thumbnails = data.thumbnails
+  this.thumbnail = data.thumbnail
   this.author = data.author
 }
 
@@ -57,13 +57,8 @@ function YoutubeQuery (data) {
 
 function YoutubeThumbnail (data) {
   this.url = data.url
-  this.width = data.width
-  this.height = data.height
-}
 
-function YoutubeThumbnails (data) {
-  let arr = data.map(x => new YoutubeThumbnail(x))
-  return arr
+  thumb.call(this, data)
 }
 
 function YoutubeFormat (data) {
@@ -104,4 +99,9 @@ function more (data) {
   if (data.fetch) Object.defineProperty(this, 'fetch', { enumerable: false, value: data.fetch })
 }
 
-module.exports = { YoutubePlaylist, YoutubeChannel, YoutubeVideo, YoutubeQuery, YoutubeThumbnails, YoutubeFormats }
+function thumb (data) {
+  this.url = this.url.substr(0, this.url.indexOf('='))
+  if (this.url.slice(0, 2) === '//') this.url = 'https:' + this.url
+}
+
+module.exports = { YoutubePlaylist, YoutubeChannel, YoutubeVideo, YoutubeQuery, YoutubeThumbnail, YoutubeFormats }
