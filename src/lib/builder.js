@@ -83,7 +83,7 @@ function makeChannelObject (data) {
     views: util.stat(util.text(full.viewCountText), 'view') || 0,
     date: util.text(full.joinedDateText).replace('Joined', '').trim(),
     thumbnail: new YoutubeThumbnail(meta.avatar.thumbnails[0]),
-    banner: new YoutubeThumbnail(header.banner.thumbnails[0])
+    banner: header.banner ? new YoutubeThumbnail(header.banner.thumbnails[0]) : undefined
   })
   channel = util.removeEmpty(channel)
   return channel
