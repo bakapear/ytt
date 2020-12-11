@@ -122,7 +122,7 @@ function makeVideoObject (data) {
 function makeQueryObject (data) {
   let query = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.subMenu.searchSubMenuRenderer.groups[4].searchFilterGroupRenderer.filters[1].searchFilterRenderer.navigationEndpoint.searchEndpoint.query
   let sections = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
-  let main = util.findWithKey(sections, 'itemSectionRenderer')
+  let main = util.findLastWithKey(sections, 'itemSectionRenderer')
   let continuation = util.findWithKey(sections, 'continuationItemRenderer')
 
   let formatItems = x => {
