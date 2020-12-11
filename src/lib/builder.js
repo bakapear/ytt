@@ -8,7 +8,8 @@ function makePlaylistObject (data) {
   let stats = data.sidebar.playlistSidebarRenderer.items[0].playlistSidebarPrimaryInfoRenderer.stats.map(x => util.text(x))
   let owner = data.sidebar.playlistSidebarRenderer.items[1].playlistSidebarSecondaryInfoRenderer.videoOwner
   let url = owner ? owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.canonicalBaseUrl : ''
-  let list = data.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer
+  let list = data.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].playlistVideoListRenderer.contents
+  let continuation = util.findWithKey(list, 'continuationItemRenderer')
   let formatItems = x => {
     let items = []
     for (let i = 0; i < x.length; i++) {
@@ -48,18 +49,20 @@ function makePlaylistObject (data) {
     views: util.stat(stats.find(x => x.indexOf('view') >= 0), 'view') || 0,
     size: util.stat(stats.find(x => x.indexOf('video') >= 0), 'video') || 0,
     thumbnails: new YoutubeThumbnails(micro.thumbnail.thumbnails),
-    author: owner ? new YoutubeChannel({
-      id: owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
-      vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
-      title: util.text(owner.videoOwnerRenderer.title),
-      thumbnails: new YoutubeThumbnails(owner.videoOwnerRenderer.thumbnail.thumbnails)
-    }) : undefined,
-    continuation: list.continuations ? list.continuations[0].nextContinuationData.continuation : null,
+    author: owner
+      ? new YoutubeChannel({
+          id: owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
+          vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+          title: util.text(owner.videoOwnerRenderer.title),
+          thumbnails: new YoutubeThumbnails(owner.videoOwnerRenderer.thumbnail.thumbnails)
+        })
+      : undefined,
+    continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
     fetch: async x => {
       let res = await fetchMore(x)
       return { continuation: res.continuation, items: formatItems(res.items) }
     },
-    items: formatItems(list.contents)
+    items: formatItems(list.filter(x => x.playlistVideoRenderer))
   })
   playlist = util.removeEmpty(playlist)
   if (!playlist.items) playlist.items = []
@@ -246,11 +249,11 @@ async function fetchMore (token) {
     },
     query: { continuation: token }
   }).json()
-  body = body[1].response.continuationContents
-  body = body[Object.keys(body)[0]]
+  body = body[1].response.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems
+  let continuation = util.findWithKey(body, 'continuationItemRenderer')
   return {
-    continuation: body.continuations ? body.continuations[0].nextContinuationData.continuation : null,
-    items: body.contents || body.items
+    continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
+    items: body.filter(x => x.playlistVideoRenderer)
   }
 }
 
