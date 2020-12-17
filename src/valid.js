@@ -9,7 +9,7 @@ module.exports = async function (value, type) {
   if (item.type === 'video') prefix = '/watch?v='
   if (item.type === 'playlist') prefix = '/playlist?list='
   if (!prefix) throw util.error(`Not an ID: '${value}'`)
-  let body = await dp.head('oembed', {
+  let body = await dp('oembed', {
     base: util.base,
     query: { url: util.base + prefix + value }
   }).catch(e => { return { statusCode: 404 } })
