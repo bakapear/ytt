@@ -2,6 +2,7 @@ let main = {
   base: 'https://www.youtube.com',
   error: x => new Error(x),
   between: (str, a, b, c = 0, d = 0) => {
+    if (a instanceof RegExp) a = str.match(a)[0]
     let x = str.indexOf(a)
     let y = str.indexOf(b, x)
     if (!b) y = str.length

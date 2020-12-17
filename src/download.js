@@ -21,7 +21,7 @@ async function getPlayerData (id) {
       bpctr: Math.ceil(Date.now() / 1000)
     }
   }).text()
-  video = JSON.parse(util.between(video, 'window.ytplayer = {};ytcfg.set(', '})', 1))
+  video = JSON.parse(util.between(video, /window\.ytplayer.*?=.*?{};.*?ytcfg\.set\(/s, '})', 1))
   let player = await dp(video.PLAYER_JS_URL, { base: util.base }).text()
   return {
     sts: video.STS,
