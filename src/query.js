@@ -23,7 +23,8 @@ async function getQueryData (query, filter, retries = 5) {
   }).text()
   body = util.parse(body)
   try { body = JSON.parse(body) } catch (e) { return getQueryData(query, filter, --retries) }
-  let content = body.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[0].itemSectionRenderer.contents[0]
-  if (body.content && content.promotedSparklesTextSearchRenderer) return getQueryData(query, filter, --retries)
+  let list = body.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer
+  let ad = list && list.contents[0].itemSectionRenderer.contents[0].promotedSparklesTextSearchRenderer
+  if (!list || ad) return getQueryData(query, filter, --retries)
   return body
 }
