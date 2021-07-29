@@ -13,7 +13,7 @@ let main = {
     x = x.replace('K', '000').replace('M', '000000').replace(/\./g, ',')
     return Number(x.substr(0, x.indexOf(y)).trim().replace(/,/g, ''))
   },
-  text: x => (typeof x === 'string') ? x.replace(/\+/g, ' ') : x.simpleText || x.runs.map(x => x.text).join(''),
+  text: x => x ? (typeof x === 'string') ? x.replace(/\+/g, ' ') : x.simpleText || x.runs.map(x => x.text).join('') : null,
   hmsToMs: x => {
     let r = 0
     x = x.split(':').reverse()
