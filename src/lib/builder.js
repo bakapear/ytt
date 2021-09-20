@@ -59,7 +59,7 @@ function makePlaylistObject (data) {
       : undefined,
     continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
     fetch: async x => {
-      let res = await fetchMore(x)
+      let res = await fetchMore('browse', x)
       return { continuation: res.continuation, items: formatItems(res.items) }
     },
     items: formatItems(list.filter(x => x.playlistVideoRenderer))
@@ -192,7 +192,7 @@ function makeQueryObject (data) {
     items: formatItems(main.contents),
     continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
     fetch: async x => {
-      let res = await fetchMoreQuery(query, x)
+      let res = await fetchMore('search', x)
       return { continuation: res.continuation, items: formatItems(res.items) }
     }
   })
@@ -235,26 +235,8 @@ function makeVideoInfoObject (data, formats) {
   return { info: util.removeEmpty(video), formats: util.removeEmpty(formats) }
 }
 
-async function fetchMore (token) {
-  let body = await dp('browse_ajax', {
-    base: util.base,
-    headers: {
-      'Accept-Language': 'en-US',
-      'X-YouTube-Client-Name': '1',
-      'X-YouTube-Client-Version': '2.20200701.03.01'
-    },
-    query: { continuation: token }
-  }).json()
-  body = body[1].response.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems
-  let continuation = util.findWithKey(body, 'continuationItemRenderer')
-  return {
-    continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
-    items: body.filter(x => x.playlistVideoRenderer)
-  }
-}
-
-async function fetchMoreQuery (query, token) {
-  let body = await dp.post('youtubei/v1/search', {
+async function fetchMore (type, token) {
+  let body = await dp.post('youtubei/v1/' + type, {
     base: util.base,
     query: {
       key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8' // public
@@ -272,12 +254,21 @@ async function fetchMoreQuery (query, token) {
     },
     type: 'json'
   }).json()
-  let sections = body.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems
-  let main = util.findWithKey(sections, 'itemSectionRenderer')
-  let continuation = util.findWithKey(sections, 'continuationItemRenderer')
-  return {
-    continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
-    items: main.contents
+  if (type === 'search') {
+    let sections = body.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems
+    let main = util.findWithKey(sections, 'itemSectionRenderer')
+    let continuation = util.findWithKey(sections, 'continuationItemRenderer')
+    return {
+      continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
+      items: main.contents
+    }
+  } else if (type === 'browse') {
+    body = body.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems
+    let continuation = util.findWithKey(body, 'continuationItemRenderer')
+    return {
+      continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
+      items: body.filter(x => x.playlistVideoRenderer)
+    }
   }
 }
 
