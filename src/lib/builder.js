@@ -29,7 +29,6 @@ function makePlaylistObject (data) {
         index: Number(util.text(item.index)),
         id: item.videoId,
         title: title,
-        views: util.stat(item.title.accessibility.accessibilityData.label.split(' ').slice(-2).join(' '), 'view') || 0,
         duration: Number(item.lengthSeconds) * 1000,
         thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
         author: new YoutubeChannel({
