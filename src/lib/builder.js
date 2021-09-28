@@ -94,7 +94,7 @@ function makeVideoObject (data) {
   let main = data.contents.twoColumnWatchNextResults.playlist.playlist.contents[0].playlistPanelVideoRenderer
   let time = main.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.text
   let url = secondary.owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.canonicalBaseUrl
-  let unlisted = !!data.contents.twoColumnWatchNextResults.playlist.playlist.badges.find(x => x.metadataBadgeRenderer.label === 'Unlisted')
+  let unlisted = primary.badges && primary.badges.find(x => x.metadataBadgeRenderer.label === 'Unlisted')
   let video = new YoutubeVideo({
     id: data.currentVideoEndpoint.watchEndpoint.videoId,
     type: unlisted ? 'unlisted' : 'public',
