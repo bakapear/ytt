@@ -143,7 +143,8 @@ function makeQueryObject (data) {
             author: new YoutubeChannel({
               id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
               vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
-              title: util.text(item.shortBylineText)
+              title: util.text(item.shortBylineText),
+              thumbnail: new YoutubeThumbnail(item.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail.thumbnails[0])
             })
           }))
           break
