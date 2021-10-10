@@ -6,27 +6,21 @@ let valid = require('./valid')
 module.exports = async function (id) {
   if (!await valid(id, 'video')) throw util.error(`Invalid video ID: '${id}'`)
   let player = await getPlayerData(id)
-  let data = await getVideoData(id, player.sts)
-  let formats = Object.values(data.streamingData.adaptiveFormats)
-  if (data.streamingData.formats) formats.push(...Object.values(data.streamingData.formats))
-  return builder.makeVideoInfoObject(data, decipherFormats(formats, player.fn))
+  let streamData = player.data.streamingData
+  let formats = Object.values(streamData.adaptiveFormats)
+  if (streamData.formats) formats.push(...Object.values(streamData.formats))
+  return builder.makeVideoInfoObject(player.data, decipherFormats(formats, player.fn))
 }
 
 async function getPlayerData (id) {
-  let video = await dp('watch', {
+  let body = await dp('watch', {
     base: util.base,
-    query: {
-      v: id,
-      hl: 'en',
-      bpctr: Math.ceil(Date.now() / 1000)
-    }
+    query: { v: id, hl: 'en', bpctr: Math.ceil(Date.now() / 1000) }
   }).text()
-  video = JSON.parse(util.between(video, /window\.ytplayer.*?=.*?{};.*?ytcfg\.set\(/s, '})', 1))
+  let data = JSON.parse(util.between(body, /var\s+?ytInitialPlayerResponse.*?=/, '};', 1))
+  let video = JSON.parse(util.between(body, /window\.ytplayer.*?=.*?{};.*?ytcfg\.set\(/s, '})', 1))
   let player = await dp(video.PLAYER_JS_URL, { base: util.base }).text()
-  return {
-    sts: video.STS,
-    fn: getCipherFunction(player)
-  }
+  return { data, fn: getCipherFunction(player) }
 }
 
 function getCipherFunction (str) {
@@ -38,30 +32,12 @@ function getCipherFunction (str) {
   return eval(side + top) // eslint-disable-line no-eval
 }
 
-async function getVideoData (id, sts, detail) {
-  let body = await dp('get_video_info', {
-    base: util.base,
-    query: {
-      video_id: id,
-      eurl: 'https://youtube.googleapis.com/v/' + id,
-      ps: 'default',
-      gl: 'US',
-      hl: 'en',
-      el: detail ? 'detailpage' : 'embedded',
-      sts: sts
-    }
-  }).text()
-  body = parseData(body)
-  return body.player_response
-}
-
 function parseData (data) {
   let res = {}
   let part = (typeof data === 'object') ? Object.entries(data) : data.split('&').map(x => x.split('='))
   for (let i = 0; i < part.length; i++) {
     let key = part[i][0]
     let val = part[i][1]
-    if (key === 'player_response') val = JSON.parse(decodeURIComponent(val))
     if (typeof val === 'object') val = parseData(val)
     res[key] = val
   }
