@@ -138,7 +138,7 @@ function makeQueryObject (data) {
             description: item.descriptionSnippet ? util.text(item.descriptionSnippet) : undefined,
             views: item.viewCountText ? (util.stat(util.text(item.viewCountText), 'view') || 0) : undefined,
             date: item.publishedTimeText ? util.text(item.publishedTimeText) : undefined,
-            duration: item.lengthText ? util.hmsToMs(util.text(item.lengthText)) : undefined,
+            duration: item.lengthText ? util.hmsToMs(util.text(item.lengthText)) : 0,
             thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
             author: new YoutubeChannel({
               id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
