@@ -33,7 +33,7 @@ function makePlaylistObject (data) {
         thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
         author: new YoutubeChannel({
           id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-          vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+          vanity: util.between(url, '/user/'),
           title: util.text(item.shortBylineText)
         })
       }))
@@ -45,17 +45,18 @@ function makePlaylistObject (data) {
     type: micro.unlisted ? 'unlisted' : 'public',
     title: meta.title,
     description: meta.description,
-    views: util.stat(stats.find(x => x.indexOf('view') >= 0), 'view') || 0,
-    size: util.stat(stats.find(x => x.indexOf('video') >= 0), 'video') || 0,
+    views: util.num(stats[0]),
+    size: util.num(stats[1]),
+    date: util.date(stats[2]),
     thumbnail: new YoutubeThumbnail(micro.thumbnail.thumbnails[0]),
     author: owner
       ? new YoutubeChannel({
           id: owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
-          vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+          vanity: util.between(url, '/user/'),
           title: util.text(owner.videoOwnerRenderer.title),
           thumbnail: new YoutubeThumbnail(owner.videoOwnerRenderer.thumbnail.thumbnails[0])
         })
-      : undefined,
+      : null,
     continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
     fetch: async x => {
       let res = await fetchMore('browse', x)
@@ -75,14 +76,14 @@ function makeChannelObject (data) {
   let full = data.contents.twoColumnBrowseResultsRenderer.tabs.find(x => x.tabRenderer.title === 'About').tabRenderer.content.sectionListRenderer.contents[0].itemSectionRenderer.contents[0].channelAboutFullMetadataRenderer
   let channel = new YoutubeChannel({
     id: header.channelId,
-    vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+    vanity: util.between(url, '/user/'),
     title: header.title,
     description: meta.description,
-    subscribers: header.subscriberCountText ? util.stat(util.text(header.subscriberCountText), 'subscriber') : undefined,
-    views: util.stat(util.text(full.viewCountText), 'view') || 0,
-    date: util.text(full.joinedDateText).replace('Joined', '').trim(),
+    subscribers: util.num(header.subscriberCountText),
+    views: util.num(full.viewCountText),
+    date: util.date(util.text(full.joinedDateText)),
     thumbnail: new YoutubeThumbnail(meta.avatar.thumbnails[0]),
-    banner: header.banner ? new YoutubeThumbnail(header.banner.thumbnails[0]) : undefined
+    banner: header.banner ? new YoutubeThumbnail(header.banner.thumbnails[0]) : null
   })
   channel = util.removeEmpty(channel)
   return channel
@@ -92,7 +93,7 @@ function makeVideoObject (data) {
   let primary = data.contents.twoColumnWatchNextResults.results.results.contents[0].videoPrimaryInfoRenderer
   let secondary = data.contents.twoColumnWatchNextResults.results.results.contents[1].videoSecondaryInfoRenderer
   let main = data.contents.twoColumnWatchNextResults.playlist.playlist.contents[0].playlistPanelVideoRenderer
-  let time = main.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer
+  let time = main.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer || {}
   let url = secondary.owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.canonicalBaseUrl
   let unlisted = primary.badges && primary.badges.find(x => x.metadataBadgeRenderer.label === 'Unlisted')
   let video = new YoutubeVideo({
@@ -100,17 +101,17 @@ function makeVideoObject (data) {
     type: unlisted ? 'unlisted' : 'public',
     title: util.text(primary.title),
     description: util.text(secondary.description),
-    views: util.stat(util.text(primary.viewCount.videoViewCountRenderer.viewCount), 'view') || 0,
-    date: util.text(primary.dateText).replace('Premiered', '').replace('Streamed live on', '').trim(),
-    likes: util.stat(primary.videoActions.menuRenderer.topLevelButtons[0].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label, 'like') || 0,
-    dislikes: util.stat(primary.videoActions.menuRenderer.topLevelButtons[1].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label, 'dislike') || 0,
-    duration: time ? util.hmsToMs(util.text(time.text)) : 0,
+    views: util.num(primary.viewCount.videoViewCountRenderer.viewCount),
+    date: util.date(util.text(primary.dateText)),
+    likes: util.num(primary.videoActions.menuRenderer.topLevelButtons[0].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label),
+    dislikes: util.num(primary.videoActions.menuRenderer.topLevelButtons[1].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label),
+    duration: util.hmsToMs(util.text(time.text)),
     thumbnail: new YoutubeThumbnail(main.thumbnail.thumbnails[0]),
     author: new YoutubeChannel({
       id: secondary.owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
-      vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+      vanity: util.between(url, '/user/'),
       title: util.text(secondary.owner.videoOwnerRenderer.title),
-      subscribers: util.stat(util.text(secondary.owner.videoOwnerRenderer.subscriberCountText), 'subscriber'),
+      subscribers: util.num(secondary.owner.videoOwnerRenderer.subscriberCountText),
       thumbnail: new YoutubeThumbnail(secondary.owner.videoOwnerRenderer.thumbnail.thumbnails[0])
     })
   })
@@ -135,14 +136,14 @@ function makeQueryObject (data) {
             id: item.videoId,
             type: 'public',
             title: util.text(item.title),
-            description: item.descriptionSnippet ? util.text(item.descriptionSnippet) : undefined,
-            views: item.viewCountText ? (util.stat(util.text(item.viewCountText), 'view') || 0) : undefined,
-            date: item.publishedTimeText ? util.text(item.publishedTimeText) : undefined,
-            duration: item.lengthText ? util.hmsToMs(util.text(item.lengthText)) : 0,
+            description: util.text(item.descriptionSnippet),
+            views: util.num(item.viewCountText),
+            date: util.text(item.publishedTimeText),
+            duration: util.hmsToMs(util.text(item.lengthText)),
             thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
             author: new YoutubeChannel({
               id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-              vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+              vanity: util.between(url, '/user/'),
               title: util.text(item.shortBylineText),
               thumbnail: new YoutubeThumbnail(item.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail.thumbnails[0])
             })
@@ -154,12 +155,12 @@ function makeQueryObject (data) {
           let url = item.shortBylineText.runs[0].navigationEndpoint.commandMetadata.webCommandMetadata.url
           items.push(new YoutubeChannel({
             id: item.channelId,
-            vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+            vanity: util.between(url, '/user/'),
             title: util.text(item.title),
-            description: item.descriptionSnippet ? util.text(item.descriptionSnippet) : undefined,
+            description: util.text(item.descriptionSnippet),
             thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
-            subscribers: item.subscriberCountText ? util.stat(util.text(item.subscriberCountText), 'subscriber') : undefined,
-            size: item.videoCountText ? util.stat(util.text(item.videoCountText), 'video') : undefined
+            subscribers: util.num(item.subscriberCountText),
+            size: util.num(item.videoCountText)
           }))
           break
         }
@@ -174,7 +175,7 @@ function makeQueryObject (data) {
             size: Number(item.videoCount),
             author: new YoutubeChannel({
               id: item.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
-              vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+              vanity: util.between(url, '/user/'),
               title: util.text(item.shortBylineText)
             })
           }))
@@ -188,7 +189,7 @@ function makeQueryObject (data) {
   let search = new YoutubeQuery({
     query: query,
     results: Number(data.estimatedResults),
-    corrected: (main.contents.length && main.contents[0].didYouMeanRenderer) ? util.text(main.contents[0].didYouMeanRenderer.correctedQuery) : undefined,
+    corrected: (main.contents.length && main.contents[0].didYouMeanRenderer) ? util.text(main.contents[0].didYouMeanRenderer.correctedQuery) : null,
     items: formatItems(main.contents),
     continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
     fetch: async x => {
@@ -210,14 +211,14 @@ function makeVideoInfoObject (data, formats) {
     id: details.videoId,
     type: micro.isUnlisted ? 'unlisted' : 'public',
     title: util.text(micro.title).replace(/\+/g, ' '),
-    description: micro.description ? util.text(micro.description).replace(/\+/g, ' ') : undefined,
+    description: micro.description ? util.text(micro.description).replace(/\+/g, ' ') : null,
     thumbnail: new YoutubeThumbnail(Object.values(details.thumbnail.thumbnails)[0]),
     date: micro.publishDate,
     duration: Number(details.lengthSeconds) * 1000,
     views: Number(details.viewCount),
     author: new YoutubeChannel({
       id: details.channelId,
-      vanity: url.indexOf('/user/') >= 0 ? util.between(url, '/user/') : undefined,
+      vanity: util.between(url, '/user/'),
       title: details.author.replace(/\+/g, ' ')
     })
   })
