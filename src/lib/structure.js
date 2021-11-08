@@ -37,7 +37,7 @@ function YoutubeVideo (data) {
   this.description = data.description
   this.stats = {
     views: data.views,
-    duration: data.duration,
+    duration: data.duration || 0,
     date: data.date,
     likes: data.likes,
     dislikes: data.dislikes
