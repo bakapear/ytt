@@ -92,7 +92,7 @@ function makeVideoObject (data) {
   let primary = data.contents.twoColumnWatchNextResults.results.results.contents[0].videoPrimaryInfoRenderer
   let secondary = data.contents.twoColumnWatchNextResults.results.results.contents[1].videoSecondaryInfoRenderer
   let main = data.contents.twoColumnWatchNextResults.playlist.playlist.contents[0].playlistPanelVideoRenderer
-  let time = main.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.text
+  let time = main.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer
   let url = secondary.owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.canonicalBaseUrl
   let unlisted = primary.badges && primary.badges.find(x => x.metadataBadgeRenderer.label === 'Unlisted')
   let video = new YoutubeVideo({
@@ -104,7 +104,7 @@ function makeVideoObject (data) {
     date: util.text(primary.dateText).replace('Premiered', '').replace('Streamed live on', '').trim(),
     likes: util.stat(primary.videoActions.menuRenderer.topLevelButtons[0].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label, 'like') || 0,
     dislikes: util.stat(primary.videoActions.menuRenderer.topLevelButtons[1].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label, 'dislike') || 0,
-    duration: util.hmsToMs(util.text(time)),
+    duration: time ? util.hmsToMs(util.text(time.text)) : 0,
     thumbnail: new YoutubeThumbnail(main.thumbnail.thumbnails[0]),
     author: new YoutubeChannel({
       id: secondary.owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
