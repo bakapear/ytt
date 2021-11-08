@@ -5,7 +5,8 @@ function YoutubePlaylist (data) {
   this.description = data.description
   this.stats = {
     views: data.views,
-    videos: data.size
+    videos: data.size,
+    date: data.date
   }
   this.thumbnail = data.thumbnail
   this.author = data.author
