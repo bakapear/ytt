@@ -1,35 +1,56 @@
-let dp = require('despair')
+let { YoutubeFormats } = require('./lib/structure')
 let util = require('./lib/util')
-let builder = require('./lib/builder')
-let valid = require('./valid')
+let req = require('./lib/request')
 
-module.exports = async function (id) {
-  if (!await valid(id, 'video')) throw util.error(`Invalid video ID: '${id}'`)
+module.exports = async (id, opts = {}) => {
   let player = await getPlayerData(id)
-  let streamData = player.data.streamingData
-  let formats = Object.values(streamData.adaptiveFormats)
-  if (streamData.formats) formats.push(...Object.values(streamData.formats))
-  return builder.makeVideoInfoObject(player.data, decipherFormats(formats, player.fn))
+  if (!player) throw Error('Invalid video')
+  let formats = await getFormats(id, player)
+
+  formats = makeFormatsObject(formats)
+
+  return util.removeEmpty(formats)
+}
+
+function makeFormatsObject (data) {
+  let regex = /(?<=codecs=").*(?=")/
+
+  return new YoutubeFormats(data.map(format => {
+    let parts = format.mimeType.split(';')
+    return {
+      url: format.url,
+      mime: parts[0],
+      codecs: parts[1].match(regex)[0].split(', '),
+      size: Number(format.contentLength),
+      duration: Number(format.approxDurationMs),
+      samplerate: Number(format.audioSampleRate) || null,
+      quality: format.qualityLabel || format.audioQuality,
+      channels: format.audioChannels
+    }
+  }))
 }
 
 async function getPlayerData (id) {
-  let body = await dp('watch', {
-    base: util.base,
-    query: { v: id, hl: 'en', bpctr: Math.ceil(Date.now() / 1000) }
-  }).text()
-  let data = JSON.parse(util.between(body, /var\s+?ytInitialPlayerResponse.*?=/, '};', 1))
-  let video = JSON.parse(util.between(body, /window\.ytplayer.*?=.*?{};.*?ytcfg\.set\(/s, '})', 1))
-  let player = await dp(video.PLAYER_JS_URL, { base: util.base }).text()
-  return { data, fn: getCipherFunction(player) }
+  let body = await req.text('watch', { v: id, bpctr: Math.ceil(Date.now() / 1000) }, true)
+  let res = JSON.parse(util.between(body, /var\s+?ytInitialPlayerResponse.*?=/, '};', 1))
+  if (id.length !== 11 || res.playabilityStatus.status === 'ERROR') return null
+  let data = JSON.parse(util.between(body, /window\.ytplayer.*?=.*?{};.*?ytcfg\.set\(/s, '})', 1))
+  let player = await req.text(data.PLAYER_JS_URL, {}, true)
+  return { sts: data.STS, fn: getCipherFunction(player) }
 }
 
-function getCipherFunction (str) {
-  let keys = ['a=a.split("")', '};', 'var ', '(', '=']
-  let js = util.between(str, `${keys[0]};${keys[2]}`)
-  let top = util.between(js, keys[0], keys[1], 1, -28)
-  let fn = keys[2] + util.between(top, keys[0], keys[3], 10, 1).split('.')[0] + keys[4]
-  let side = util.between(js, fn, keys[1], 2, -fn.length)
-  return eval(side + top) // eslint-disable-line no-eval
+async function getFormats (id, player) {
+  let body = await req.api('player', { videoId: id, playbackContext: { contentPlaybackContext: { signatureTimestamp: player.sts } } })
+  let formats = [...body.streamingData.formats, ...body.streamingData.adaptiveFormats]
+  formats = formats.map(item => {
+    if (item.signatureCipher) {
+      let cipher = parseData(item.signatureCipher)
+      delete item.signatureCipher
+      item.url = `${decodeURIComponent(cipher.url)}&${cipher.sp}=${player.fn(decodeURIComponent(cipher.s))}`
+    }
+    return item
+  })
+  return formats
 }
 
 function parseData (data) {
@@ -44,16 +65,11 @@ function parseData (data) {
   return res
 }
 
-function decipherFormats (data, fn) {
-  data = Object.values(data)
-  for (let i = 0; i < data.length; i++) {
-    let item = data[i]
-    if (item.mimeType) item.mimeType = item.mimeType.replace(/\+/g, ' ')
-    if (item.signatureCipher) {
-      let cipher = parseData(item.signatureCipher)
-      delete item.signatureCipher
-      item.url = `${decodeURIComponent(cipher.url)}&${cipher.sp}=${fn(decodeURIComponent(cipher.s))}`
-    }
-  }
-  return data
+function getCipherFunction (str) {
+  let keys = ['a=a.split("")', '};', 'var ', '(', '=']
+  let js = util.between(str, keys[1])
+  let top = util.between(js, keys[0], keys[1], 1, -28)
+  let fn = keys[2] + util.between(top, keys[0], keys[3], 10, 1).split('.')[0] + keys[4]
+  let side = util.between(js, fn, keys[1], 2, -fn.length)
+  return eval(side + top) // eslint-disable-line no-eval
 }

@@ -1,65 +1,73 @@
-function YoutubePlaylist (data) {
-  this.id = data.id
-  this.type = data.type
-  this.title = data.title
-  this.description = data.description
-  this.stats = {
-    views: data.views,
-    videos: data.size,
-    date: data.date
-  }
-  this.thumbnail = data.thumbnail
-  this.author = data.author
-  this.items = data.items
-  if (data.items) more.call(this, data)
-}
+function YoutubeSearch (data) {
+  this.query = data.query
+  this.corrected = data.corrected
+  this.size = data.size
 
-function YoutubeChannel (data) {
-  this.id = data.id
-  this.vanity = data.vanity
-  this.title = data.title
-  this.description = data.description
-  this.stats = {
-    views: data.views,
-    videos: data.size,
-    subscribers: data.subscribers,
-    date: data.date
-  }
-  this.thumbnail = data.thumbnail
-  this.banner = data.banner
+  if (data.results) more.call(this, data, 'results')
 }
 
 function YoutubeVideo (data) {
   this.id = data.id
   this.index = data.index
   this.type = data.type
+  this.live = data.live
+  this.new = data.new
   this.title = data.title
   this.description = data.description
-  this.stats = {
-    views: data.views,
-    duration: data.duration || 0,
-    date: data.date,
-    likes: data.likes,
-    dislikes: data.dislikes
-  }
-  this.thumbnail = data.thumbnail
-  this.author = data.author
+  this.duration = data.duration
+  this.views = data.views
+  this.viewers = data.viewers
+  this.date = data.date
+  this.likes = data.likes
+  this.dislikes = data.dislikes
+  this.category = data.category
+  this.tags = data.tags
+  if (data.channel) this.channel = new YoutubeChannel(data.channel)
+  if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
+
+  if (data.comments) more.call(this, data, 'comments')
 }
 
-function YoutubeQuery (data) {
-  this.query = data.query
-  this.stats = {
-    results: data.results,
-    corrected: data.corrected
-  }
-  this.items = data.items
-  if (data.items) more.call(this, data)
+function YoutubeChannel (data) {
+  this.id = data.id
+  this.legacy = data.legacy
+  this.custom = data.custom
+  this.verified = data.verified
+  this.title = data.title
+  this.description = data.description
+  this.views = data.views
+  this.subscribers = data.subscribers
+  this.date = data.date
+  this.tags = data.tags
+  if (data.avatar) this.avatar = new YoutubeThumbnails(data.avatar)
+  if (data.banner) this.banner = new YoutubeThumbnails(data.banner)
+
+  // TODO: all of the things below
+  if (data.videos) more.call(this, data, 'videos')
+  if (data.playlists) more.call(this, data, 'playlists')
+  if (data.posts) more.call(this, data, 'posts')
+  if (data.channels) more.call(this, data, 'channels')
+  if (data.search) { /* search function here */ }
 }
 
-function YoutubeThumbnail (data) {
-  this.url = data.url
+function YoutubePlaylist (data) {
+  this.id = data.id
+  this.type = data.type
+  this.title = data.title
+  this.description = data.description
+  this.views = data.views
+  this.size = data.size
+  this.date = data.date
+  if (data.channel) this.channel = new YoutubeChannel(data.channel)
+  if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
 
-  thumb.call(this, data)
+  if (data.videos) more.call(this, data, 'videos')
+}
+
+function YoutubeFormats (data) {
+  // TODO: add cool methods
+  this.url = data[0].url
+  this.formats = data.map(x => new YoutubeFormat(x))
 }
 
 function YoutubeFormat (data) {
@@ -68,41 +76,70 @@ function YoutubeFormat (data) {
   this.mime = data.mime
   this.codecs = data.codecs
   this.quality = data.quality
-  this.stats = {
-    width: data.width,
-    height: data.height,
-    bitrate: data.bitrate,
-    samplerate: data.samplerate,
-    channels: data.channels,
-    size: data.size,
-    duration: data.duration,
-    fps: data.fps
-  }
+  this.width = data.width
+  this.height = data.height
+  this.bitrate = data.bitrate
+  this.samplerate = data.samplerate
+  this.channels = data.channels
+  this.size = data.size
+  this.duration = data.duration
+  this.fps = data.fps
 }
 
-function YoutubeFormats (data) {
-  let arr = data.map(x => new YoutubeFormat(x))
-  return arr
+function YoutubeThumbnails (data) {
+  // TODO: add cool methods
+  this.url = data[0].url
+  this.thumbnails = data.map(x => new YoutubeThumbnail(x))
 }
 
-function more (data) {
-  Object.defineProperty(this.items, 'more', {
-    enumerable: false,
-    value: async () => {
-      if (!this.items.continuation) return false
-      let data = await this.fetch(this.items.continuation)
-      this.items.continuation = data.continuation
-      if (data.items) this.items.push(...data.items)
-      return true
+function YoutubeThumbnail (data) {
+  this.url = data.url
+  this.width = data.width
+  this.height = data.height
+}
+
+function YoutubeTranscript (data) {
+  this.lang = data.lang
+  this.cues = data.cues.map(x => new YoutubeTranscriptCue(x))
+}
+
+function YoutubeTranscriptCue (data) {
+  this.text = data.text
+  this.duration = data.duration
+  this.offset = data.offset
+}
+
+function YoutubeComment (data) {
+  this.id = data.id
+  this.edited = data.edited
+  this.hearted = data.hearted
+  this.pinned = data.pinned
+  this.owner = data.owner
+  this.text = data.text
+  this.likes = data.likes
+  this.date = data.date
+  if (data.channel) this.channel = new YoutubeChannel(data.channel)
+
+  if (data.replies) more.call(this, data, 'replies')
+}
+
+function more (data, prop) {
+  this[prop] = []
+  if (!data[prop]) data[prop] = {}
+  Object.defineProperties(this[prop], {
+    continuation: { enumerable: false, writable: true, value: data[prop].continuation },
+    fetch: { enumerable: false, value: data[prop].fetch },
+    more: {
+      enumerable: false,
+      value: async () => {
+        if (!this[prop].continuation) return false
+        let res = await this[prop].fetch(this[prop].continuation)
+        this[prop].continuation = res.continuation
+        this[prop].push(...res.items)
+        return true
+      }
     }
   })
-  if (data.continuation) Object.defineProperty(this.items, 'continuation', { enumerable: false, writable: true, value: data.continuation })
-  if (data.fetch) Object.defineProperty(this, 'fetch', { enumerable: false, value: data.fetch })
 }
 
-function thumb (data) {
-  this.url = this.url.substr(0, this.url.indexOf('='))
-  if (this.url.slice(0, 2) === '//') this.url = 'https:' + this.url
-}
-
-module.exports = { YoutubePlaylist, YoutubeChannel, YoutubeVideo, YoutubeQuery, YoutubeThumbnail, YoutubeFormats }
+module.exports = { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist, YoutubeFormats, YoutubeTranscript, YoutubeComment }

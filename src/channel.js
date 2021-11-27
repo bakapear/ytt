@@ -1,31 +1,48 @@
-let dp = require('despair')
+let { YoutubeChannel } = require('./lib/structure')
 let util = require('./lib/util')
-let builder = require('./lib/builder')
+let req = require('./lib/request')
 
-module.exports = async function (id, opts = {}) {
-  if (!id) throw util.error(`Invalid channel ID: '${id}'`)
-  let type = await getQueryType(id)
-  let data = await getChannelData(id, type)
-  let channel = builder.makeChannelObject(data)
-  return channel
+let TABS = {
+  home: 'EghmZWF0dXJlZA==',
+  videos: 'EgZ2aWRlb3M=',
+  playlists: 'EglwbGF5bGlzdHM=',
+  community: 'Egljb21tdW5pdHk=',
+  channels: 'EghjaGFubmVscw==',
+  about: 'EgVhYm91dA==',
+  search: 'EgZzZWFyY2g='
 }
 
-async function getChannelData (id, type, retries = 5) {
-  if (retries <= 0) throw util.error('Failed to fetch the YouTube page properly!')
-  let body = await dp(type + '/' + id + '/about', {
-    base: util.base,
-    headers: { 'Accept-Language': 'en-US' }
-  }).text()
-  if (!body) throw util.error(`Invalid channel ID: '${id}'`)
-  body = util.parse(body)
-  try { body = JSON.parse(body) } catch (e) { return getChannelData(id, type, --retries) }
-  return body
+module.exports = async (id, opts = {}) => {
+  if (typeof id !== 'string') throw Error('Invalid value')
+  let body = await req.api('browse', { browseId: id, params: TABS.about })
+  if (!body || !body.contents || !body.metadata) throw Error('Invalid channel')
+
+  let chan = makeChannelObject(body)
+
+  return util.removeEmpty(chan)
 }
 
-async function getQueryType (id) {
-  let types = ['channel', 'user']
-  for (let i = 0; i < types.length; i++) {
-    let { statusCode } = await dp.head(types[i] + '/' + id, { base: util.base }).catch(e => { return { statusCode: e.code } })
-    if (statusCode === 200) return types[i]
-  }
+function makeChannelObject (data) {
+  let header = data.header.c4TabbedHeaderRenderer
+  let meta = data.metadata.channelMetadataRenderer
+  let micro = data.microformat.microformatDataRenderer
+  let tabs = data.contents.twoColumnBrowseResultsRenderer.tabs
+  let about = tabs.find(x => x.tabRenderer.selected).tabRenderer
+    .content.sectionListRenderer.contents[0].itemSectionRenderer
+    .contents[0].channelAboutFullMetadataRenderer
+
+  return new YoutubeChannel({
+    id: header.channelId,
+    legacy: meta.doubleclickTrackingUsername || util.between(meta.vanityChannelUrl, '/user/'),
+    custom: util.between(meta.vanityChannelUrl, '/c/'),
+    verified: !!header.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'),
+    title: micro.title,
+    description: util.text(about.description),
+    views: util.num(about.viewCountText),
+    subscribers: util.num(header.subscriberCountText),
+    date: util.date(about.joinedDateText),
+    tags: micro.tags,
+    avatar: header.avatar.thumbnails,
+    banner: header.banner ? [...header.banner.thumbnails, ...header.tvBanner.thumbnails, ...header.mobileBanner.thumbnails] : null
+  })
 }
