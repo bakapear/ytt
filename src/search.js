@@ -87,7 +87,7 @@ async function fetchResults (next, data) {
           title: util.text(chan.title),
           avatar: chan.thumbnail.thumbnails,
           description: util.text(chan.descriptionSnippet),
-          videos: util.num(chan.videoCountText),
+          size: util.num(chan.videoCountText),
           verified: !!chan.ownerBadges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'),
           subscribers: util.num(chan.subscriberCountText)
         }))
@@ -101,7 +101,7 @@ async function fetchResults (next, data) {
           type: 'public',
           title: util.text(list.title),
           thumbnail: list.thumbnails[0].thumbnails,
-          videos: Number(list.videoCount),
+          size: Number(list.videoCount),
           channel: {
             id: owner.navigationEndpoint.browseEndpoint.browseId,
             legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),

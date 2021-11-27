@@ -36,6 +36,7 @@ function YoutubeChannel (data) {
   this.title = data.title
   this.description = data.description
   this.views = data.views
+  this.size = data.size
   this.subscribers = data.subscribers
   this.date = data.date
   this.tags = data.tags
