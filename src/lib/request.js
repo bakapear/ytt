@@ -18,6 +18,7 @@ module.exports = {
   async text (url, query) {
     return await request(url, {
       method: 'GET',
+      headers: { 'User-Agent': 'Safari/' },
       base: this.base,
       query,
       raw: true

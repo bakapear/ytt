@@ -5,5 +5,6 @@ module.exports = {
   channel: require('./src/channel'),
   playlist: require('./src/playlist'),
   download: require('./src/download'),
-  transcript: require('./src/transcript')
+  transcript: require('./src/transcript'),
+  complete: require('./src/complete')
 }
