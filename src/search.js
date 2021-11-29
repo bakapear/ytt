@@ -114,7 +114,7 @@ async function fetchResults (next, data) {
     }
   }
 
-  return { items: res, continuation: token }
+  return { items: util.removeEmpty(res), continuation: token || null }
 }
 
 function getFilterParams (opts) {
