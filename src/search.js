@@ -59,6 +59,7 @@ async function fetchResults (next, data) {
         let live = !!vid.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_LIVE_NOW')
         res.push(new YoutubeVideo({
           id: vid.videoId,
+          type: 'public',
           live: live,
           new: !!vid.badges?.some(x => x.metadataBadgeRenderer.label === 'New'),
           thumbnail: vid.thumbnail.thumbnails,
