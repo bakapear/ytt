@@ -33,6 +33,8 @@ function makeVideoObject (data) {
     com = { fetch: fetchComments, continuation: com }
   }
 
+  let ratings = details.allowRatings
+
   return new YoutubeVideo({
     id: details.videoId,
     live: !!details.isLiveContent,
@@ -43,8 +45,8 @@ function makeVideoObject (data) {
     duration: Number(details.lengthSeconds) * 1000,
     views: Number(details.viewCount),
     viewers: views.isLive ? util.num(views.viewCount) : null,
-    likes: util.num(buttons[0].toggleButtonRenderer.defaultText.accessibility?.accessibilityData.label),
-    dislikes: util.num(buttons[1].toggleButtonRenderer.defaultText.accessibility?.accessibilityData.label),
+    likes: util.num(buttons[0].toggleButtonRenderer.defaultText.accessibility?.accessibilityData.label) || (ratings ? 0 : null),
+    dislikes: util.num(buttons[1].toggleButtonRenderer.defaultText.accessibility?.accessibilityData.label) || (ratings ? 0 : null),
     category: micro.category,
     tags: details.keywords,
     date: util.date(primary.dateText),
@@ -67,6 +69,7 @@ async function fetchComments (next) {
 
   let contents = data.onResponseReceivedEndpoints[0].appendContinuationItemsAction?.continuationItems
   if (!contents) contents = data.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
+  if (!contents) return { items: [], continuation: null }
 
   let token = util.key(contents, 'continuationItemRenderer')
   if (token) {
