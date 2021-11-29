@@ -66,7 +66,7 @@ async function fetchResults (next, data) {
           description: util.text(vid.detailedMetadataSnippets?.[0].snippetText),
           date: util.date(vid.publishedTimeText),
           duration: util.time(vid.lengthText),
-          [live ? 'viewers' : 'views']: util.num(vid.viewCountText),
+          [live ? 'viewers' : 'views']: util.num(vid.viewCountText) || 0,
           channel: {
             id: owner.navigationEndpoint.browseEndpoint.browseId,
             legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
