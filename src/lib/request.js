@@ -27,6 +27,7 @@ module.exports = {
   async api (type, data) {
     return await request(type, {
       method: 'POST',
+      headers: { 'User-Agent': 'AppleWebKit Chrome/96' },
       base: this.base + this.path,
       query: { key: this.key },
       data: {
