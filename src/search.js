@@ -33,8 +33,7 @@ function makeSearchObject (data) {
   return new YoutubeSearch({
     query: data.query,
     corrected: util.text(corrected),
-    size: Number(data.estimatedResults),
-    results: { fetch: fetchResults }
+    results: { fetch: fetchResults, continuation: true, size: Number(data.estimatedResults) }
   })
 }
 

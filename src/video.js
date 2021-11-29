@@ -10,6 +10,10 @@ module.exports = async (id, opts = {}) => {
 
   let video = makeVideoObject({ ...body, ...player })
 
+  let res = await fetchRelated(null, body)
+  video.related.push(...res.items)
+  video.related.continuation = res.continuation
+
   return util.removeEmpty(video)
 }
 
@@ -23,8 +27,11 @@ function makeVideoObject (data) {
   let owner = secondary.owner.videoOwnerRenderer
   let views = primary.viewCount.videoViewCountRenderer
 
-  let comments = contents[contents.length - 1].itemSectionRenderer.contents[0].continuationItemRenderer
-  if (comments) comments = { fetch: fetchComments, continuation: comments.continuationEndpoint.continuationCommand.token }
+  let com = contents[contents.length - 1].itemSectionRenderer?.contents[0].continuationItemRenderer
+  if (com) {
+    com = com.continuationEndpoint.continuationCommand.token
+    com = { fetch: fetchComments, continuation: com }
+  }
 
   return new YoutubeVideo({
     id: details.videoId,
@@ -50,7 +57,8 @@ function makeVideoObject (data) {
       verified: !!owner.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'),
       subscribers: util.num(owner.subscriberCountText)
     },
-    comments: comments
+    related: { fetch: fetchRelated, continuation: true },
+    comments: com
   })
 }
 
@@ -72,10 +80,13 @@ async function fetchComments (next) {
     let com = item.commentThreadRenderer?.comment.commentRenderer || item.commentRenderer
     if (!com) continue
 
-    let rep = item.commentThreadRenderer?.replies
+    let rep = item.commentThreadRenderer?.replies?.commentRepliesRenderer
     if (rep) {
-      rep = rep.commentRepliesRenderer.contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
-      rep = { continuation: rep, fetch: fetchComments }
+      rep = {
+        fetch: fetchComments,
+        continuation: rep.contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token,
+        size: util.num(rep.viewReplies.buttonRenderer.text.runs[1]?.text)
+      }
     }
 
     let date = util.text(com.publishedTimeText)
@@ -103,5 +114,53 @@ async function fetchComments (next) {
     }))
   }
 
+  let count = util.num(data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand?.continuationItems[0].commentsHeaderRenderer.commentsCount)
+  if (count) this.size = count
+
+  return { items: util.removeEmpty(res), continuation: token || null }
+}
+
+async function fetchRelated (next, data) {
+  let contents = null
+
+  if (!data) {
+    data = await req.api('next', { continuation: next })
+    contents = data.onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems
+  } else contents = data.contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results
+
+  let token = util.key(contents, 'continuationItemRenderer')?.continuationEndpoint.continuationCommand.token
+
+  let res = []
+  for (let item of contents) {
+    let key = Object.keys(item)[0]
+    switch (key) {
+      case 'compactVideoRenderer': {
+        let vid = item[key]
+        let owner = vid.shortBylineText?.runs[0]
+        let live = !!vid.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_LIVE_NOW')
+        res.push(new YoutubeVideo({
+          id: vid.videoId,
+          type: 'public',
+          live: live,
+          new: !!vid.badges?.some(x => x.metadataBadgeRenderer.label === 'New'),
+          thumbnail: vid.thumbnail.thumbnails,
+          title: util.text(vid.title),
+          description: util.text(vid.detailedMetadataSnippets?.[0].snippetText),
+          date: util.date(vid.publishedTimeText),
+          duration: util.time(vid.lengthText),
+          [live ? 'viewers' : 'views']: util.num(vid.viewCountText) || 0,
+          channel: {
+            id: owner.navigationEndpoint.browseEndpoint.browseId,
+            legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+            custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+            verified: !!vid.ownerBadges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'),
+            title: owner.text,
+            avatar: vid.channelThumbnail.thumbnails
+          }
+        }))
+        break
+      }
+    }
+  }
   return { items: util.removeEmpty(res), continuation: token || null }
 }

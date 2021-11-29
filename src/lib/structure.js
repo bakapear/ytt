@@ -1,9 +1,7 @@
 function YoutubeSearch (data) {
   this.query = data.query
   this.corrected = data.corrected
-  this.size = data.size
-
-  if (data.results) more.call(this, data, 'results')
+  if (data.results) next.call(this, data, 'results')
 }
 
 function YoutubeVideo (data) {
@@ -25,7 +23,8 @@ function YoutubeVideo (data) {
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
   if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
 
-  if (data.comments) more.call(this, data, 'comments')
+  if (data.related) next.call(this, data, 'related')
+  if (data.comments) next.call(this, data, 'comments')
 }
 
 function YoutubeChannel (data) {
@@ -36,7 +35,6 @@ function YoutubeChannel (data) {
   this.title = data.title
   this.description = data.description
   this.views = data.views
-  this.size = data.size
   this.subscribers = data.subscribers
   this.date = data.date
   this.tags = data.tags
@@ -44,10 +42,10 @@ function YoutubeChannel (data) {
   if (data.banner) this.banner = new YoutubeThumbnails(data.banner)
 
   // TODO: all of the things below
-  if (data.videos) more.call(this, data, 'videos')
-  if (data.playlists) more.call(this, data, 'playlists')
-  if (data.posts) more.call(this, data, 'posts')
-  if (data.channels) more.call(this, data, 'channels')
+  if (data.videos) next.call(this, data, 'videos')
+  if (data.playlists) next.call(this, data, 'playlists')
+  if (data.posts) next.call(this, data, 'posts')
+  if (data.channels) next.call(this, data, 'channels')
   if (data.search) { /* search function here */ }
 }
 
@@ -57,12 +55,11 @@ function YoutubePlaylist (data) {
   this.title = data.title
   this.description = data.description
   this.views = data.views
-  this.size = data.size
   this.date = data.date
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
   if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
 
-  if (data.videos) more.call(this, data, 'videos')
+  if (data.videos) next.call(this, data, 'videos')
 }
 
 function YoutubeFormats (data) {
@@ -121,23 +118,27 @@ function YoutubeComment (data) {
   this.date = data.date
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
 
-  if (data.replies) more.call(this, data, 'replies')
+  if (data.replies) next.call(this, data, 'replies')
 }
 
-function more (data, prop) {
+function next (data, prop) {
+  if (!data[prop].continuation) return
   this[prop] = []
-  if (!data[prop]) data[prop] = {}
+  if (data[prop].size) this[prop].size = data[prop].size
   Object.defineProperties(this[prop], {
     continuation: { enumerable: false, writable: true, value: data[prop].continuation },
     fetch: { enumerable: false, value: data[prop].fetch },
-    more: {
+    next: {
       enumerable: false,
-      value: async () => {
-        if (!this[prop].continuation) return false
-        let res = await this[prop].fetch(this[prop].continuation)
-        this[prop].continuation = res.continuation
-        this[prop].push(...res.items)
-        return true
+      value: async (steps = 1) => {
+        let step = 0
+        let last = this[prop].length
+        while (this[prop].continuation && step++ < steps) {
+          let res = await this[prop].fetch(this[prop].continuation)
+          this[prop].continuation = res.continuation
+          this[prop].push(...res.items)
+        }
+        return this[prop].slice(last)
       }
     }
   })
