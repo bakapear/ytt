@@ -4,10 +4,17 @@ module.exports = {
   base: 'https://www.youtube.com/',
   path: 'youtubei/v1/',
   key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
-  client: '1',
-  version: '2.21111111',
-  hl: 'en',
-  gl: 'US',
+  agent: 'AppleWebKit Chrome/96',
+  context: {
+    client: {
+      hl: 'en',
+      gl: 'US',
+      clientName: '1',
+      clientVersion: '2.21111111',
+      clientScreen: 'EMBED'
+    },
+    thirdParty: { embedUrl: 'https://www.youtube.com/' }
+  },
   async head (url, query) {
     return await request(url, {
       method: 'HEAD',
@@ -18,7 +25,7 @@ module.exports = {
   async text (url, query) {
     return await request(url, {
       method: 'GET',
-      headers: { 'User-Agent': 'Safari/' },
+      headers: { 'User-Agent': this.agent },
       base: this.base,
       query,
       raw: true
@@ -27,13 +34,10 @@ module.exports = {
   async api (type, data) {
     return await request(type, {
       method: 'POST',
-      headers: { 'User-Agent': 'AppleWebKit Chrome/96' },
+      headers: { 'User-Agent': this.agent },
       base: this.base + this.path,
       query: { key: this.key },
-      data: {
-        context: { client: { hl: this.hl, gl: this.gl, clientName: this.client, clientVersion: this.version } },
-        ...data
-      }
+      data: { context: this.context, ...data }
     }).catch(e => null)
   }
 }
