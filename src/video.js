@@ -71,7 +71,7 @@ async function fetchComments (next) {
   if (!contents) contents = data.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
   if (!contents) return { items: [], continuation: null }
 
-  let token = util.key(contents, 'continuationItemRenderer')
+  let token = contents[contents.length - 1].continuationItemRenderer
   if (token) {
     token = token.button?.buttonRenderer.command || token.continuationEndpoint
     token = token.continuationCommand.token
@@ -131,7 +131,7 @@ async function fetchRelated (next, data) {
     contents = data.onResponseReceivedEndpoints[0].appendContinuationItemsAction.continuationItems
   } else contents = data.contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results
 
-  let token = util.key(contents, 'continuationItemRenderer')?.continuationEndpoint.continuationCommand.token
+  let token = contents[contents.length - 1].continuationItemRenderer?.continuationEndpoint.continuationCommand.token
 
   let res = []
   for (let item of contents) {

@@ -20,10 +20,6 @@ module.exports = {
     for (let o in obj) return false // eslint-disable-line no-unreachable-loop
     return true
   },
-  key (obj, str) {
-    let a = obj.find(x => x[str])
-    return a ? a[str] : null
-  },
   text (obj) {
     if (!obj) return null
     return obj.simpleText || obj.runs.map(x => x.text).join('')

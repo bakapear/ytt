@@ -19,8 +19,9 @@ module.exports = async (id, opts = {}) => {
 function makePlaylistObject (data) {
   let micro = data.microformat.microformatDataRenderer
   let items = data.sidebar.playlistSidebarRenderer.items
-  let info = util.key(items, 'playlistSidebarPrimaryInfoRenderer')
-  let owner = util.key(items, 'playlistSidebarSecondaryInfoRenderer').videoOwner.videoOwnerRenderer
+
+  let info = items[0].playlistSidebarPrimaryInfoRenderer
+  let owner = items[1].playlistSidebarSecondaryInfoRenderer.videoOwner.videoOwnerRenderer
 
   return new YoutubePlaylist({
     id: info.navigationEndpoint.watchEndpoint.playlistId,
@@ -53,7 +54,7 @@ async function fetchVideos (next, data) {
       .itemSectionRenderer.contents[0].playlistVideoListRenderer.contents
   }
 
-  let token = util.key(contents, 'continuationItemRenderer')?.continuationEndpoint.continuationCommand.token
+  let token = contents[contents.length - 1].continuationItemRenderer?.continuationEndpoint.continuationCommand.token
 
   let res = []
 

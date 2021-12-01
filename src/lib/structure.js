@@ -1,5 +1,6 @@
 function YoutubeSearch (data) {
   this.query = data.query
+  this.suggested = data.suggested
   this.corrected = data.corrected
   if (data.results) next.call(this, data, 'results')
 }

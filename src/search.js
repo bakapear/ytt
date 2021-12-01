@@ -27,11 +27,14 @@ module.exports = async (query, opts = {}) => {
 
 function makeSearchObject (data) {
   let contents = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
-  let items = util.key(contents, 'itemSectionRenderer').contents
-  let corrected = util?.key(items, 'didYouMeanRenderer')?.correctedQuery
+  let items = contents[0].itemSectionRenderer.contents
+
+  let suggested = items[0].didYouMeanRenderer?.correctedQuery
+  let corrected = items[0].showingResultsForRenderer?.correctedQuery
 
   return new YoutubeSearch({
     query: data.query,
+    suggested: util.text(suggested),
     corrected: util.text(corrected),
     results: { fetch: fetchResults, continuation: true, size: Number(data.estimatedResults) }
   })
@@ -45,8 +48,8 @@ async function fetchResults (next, data) {
     contents = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems
   } else contents = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
 
-  let token = util.key(contents, 'continuationItemRenderer')?.continuationEndpoint.continuationCommand.token
-  let items = util.key(contents, 'itemSectionRenderer').contents
+  let items = contents[0].itemSectionRenderer.contents
+  let token = contents[contents.length - 1].continuationItemRenderer?.continuationEndpoint.continuationCommand.token
 
   let res = []
   for (let item of items) {
