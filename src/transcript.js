@@ -3,10 +3,9 @@ let { YoutubeTranscript } = require('./lib/structure')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (id, opts) => {
+module.exports = async (id) => {
   if (typeof id !== 'string') throw Error('Invalid value')
-  // TODO: find way to add lang params
-  let body = await req.api('get_transcript', { params: Buffer.from(Buffer.from([10, 11]) + id).toString('base64') })
+  let body = await req.api('get_transcript', { params: Buffer.from([10, id.length, ...Buffer.from(id)]).toString('base64') })
   if (!body || id.length !== 11) throw Error('Invalid video')
   if (!body.actions) throw Error('Video does not have a transcript')
 
@@ -15,10 +14,26 @@ module.exports = async (id, opts) => {
   return util.removeEmpty(trans)
 }
 
+async function fetchTranscript (params) {
+  let body = await req.api('get_transcript', { params })
+  let trans = makeTranscriptObject(body)
+  return util.removeEmpty(trans)
+}
+
 function makeTranscriptObject (data) {
   let main = data.actions[0].updateEngagementPanelAction.content.transcriptRenderer
   let trans = main.body.transcriptBodyRenderer.cueGroups
-  let language = main.footer.transcriptFooterRenderer.languageMenu.sortFilterSubMenuRenderer.subMenuItems[0].title
+  let langs = main.footer.transcriptFooterRenderer.languageMenu.sortFilterSubMenuRenderer.subMenuItems
+
+  let language = langs.splice(langs.findIndex(x => x.selected), 1)[0].title
+
+  langs = langs.map(x => {
+    return {
+      language: x.title,
+      transcript: async () => fetchTranscript(x.continuation.reloadContinuationData.continuation)
+    }
+  })
+  if (!langs.length) langs = null
 
   let items = []
   for (let t of trans) {
@@ -30,5 +45,5 @@ function makeTranscriptObject (data) {
     })
   }
 
-  return new YoutubeTranscript({ language, cues: items })
+  return new YoutubeTranscript({ language, langs, cues: items })
 }
