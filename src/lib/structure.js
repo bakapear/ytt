@@ -21,6 +21,7 @@ function YoutubeVideo (data) {
   this.dislikes = data.dislikes
   this.category = data.category
   this.tags = data.tags
+  if (data.chapters) this.chapters = data.chapters.map(x => new YoutubeChapter(x))
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
   if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
 
@@ -120,6 +121,12 @@ function YoutubeComment (data) {
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
 
   if (data.replies) next.call(this, data, 'replies')
+}
+
+function YoutubeChapter (data) {
+  this.title = data.title
+  this.offset = data.offset
+  this.thumbnail = new YoutubeThumbnails(data.thumbnail)
 }
 
 function next (data, prop) {

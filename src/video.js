@@ -35,6 +35,18 @@ function makeVideoObject (data) {
 
   let ratings = details.allowRatings
 
+  let chapters = data.playerOverlays.playerOverlayRenderer.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer.playerBar.multiMarkersPlayerBarRenderer.markersMap[0].value.chapters
+  if (chapters) {
+    chapters = chapters.map(x => {
+      let c = x.chapterRenderer
+      return {
+        title: util.text(c.title),
+        offset: c.timeRangeStartMillis,
+        thumbnail: c.thumbnail.thumbnails
+      }
+    })
+  }
+
   return new YoutubeVideo({
     id: details.videoId,
     live: !!details.isLiveContent,
@@ -59,6 +71,7 @@ function makeVideoObject (data) {
       verified: !!owner.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'),
       subscribers: util.num(owner.subscriberCountText)
     },
+    chapters: chapters,
     related: { fetch: fetchRelated, continuation: true },
     comments: com
   })
