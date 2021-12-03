@@ -99,7 +99,7 @@ function YoutubeThumbnail (data) {
 }
 
 function YoutubeTranscript (data) {
-  this.lang = data.lang
+  this.language = data.language
   this.cues = data.cues.map(x => new YoutubeTranscriptCue(x))
 }
 

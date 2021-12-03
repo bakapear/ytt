@@ -18,7 +18,7 @@ module.exports = async (id, opts) => {
 function makeTranscriptObject (data) {
   let main = data.actions[0].updateEngagementPanelAction.content.transcriptRenderer
   let trans = main.body.transcriptBodyRenderer.cueGroups
-  let lang = main.footer.transcriptFooterRenderer.languageMenu.sortFilterSubMenuRenderer.subMenuItems[0].title
+  let language = main.footer.transcriptFooterRenderer.languageMenu.sortFilterSubMenuRenderer.subMenuItems[0].title
 
   let items = []
   for (let t of trans) {
@@ -30,5 +30,5 @@ function makeTranscriptObject (data) {
     })
   }
 
-  return new YoutubeTranscript({ lang, cues: items })
+  return new YoutubeTranscript({ language, cues: items })
 }
