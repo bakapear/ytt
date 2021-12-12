@@ -20,6 +20,20 @@ module.exports = {
     for (let o in obj) return false // eslint-disable-line no-unreachable-loop
     return true
   },
+  extend (target) {
+    for (let i = 1; i < arguments.length; ++i) {
+      let from = arguments[i]
+      if (typeof from !== 'object') continue
+      for (let j in from) {
+        if (Object.prototype.hasOwnProperty.call(from, j)) {
+          target[j] = typeof from[j] === 'object'
+            ? this.extend({}, target[j], from[j])
+            : from[j]
+        }
+      }
+    }
+    return target
+  },
   text (obj) {
     if (!obj) return null
     return obj.simpleText || obj.runs.map(x => x.text).join('')

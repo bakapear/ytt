@@ -1,4 +1,5 @@
 let https = require('https')
+let util = require('./util')
 
 module.exports = {
   base: 'https://www.youtube.com/',
@@ -37,7 +38,7 @@ module.exports = {
       headers: { 'User-Agent': this.agent },
       base: this.base + this.path,
       query: { key: this.key },
-      data: { context: this.context, ...data }
+      data: util.extend({ context: this.context }, data)
     }).catch(e => null)
   }
 }
