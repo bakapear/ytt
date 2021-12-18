@@ -6,7 +6,7 @@ module.exports = async (id, opts = {}) => {
   let body = await req.api('player', { videoId: id, context: { client: { clientName: 'ANDROID', clientVersion: '16.50' } } })
   if (body.playabilityStatus.status === 'ERROR') throw Error('Invalid video')
 
-  let formats = makeFormatsObject([...body.streamingData.formats, ...body.streamingData.adaptiveFormats])
+  let formats = makeFormatsObject([...(body.streamingData.formats || []), ...(body.streamingData.adaptiveFormats || [])])
 
   return util.removeEmpty(formats)
 }
