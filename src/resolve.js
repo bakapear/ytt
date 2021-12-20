@@ -6,6 +6,7 @@ let REGEX = /(?:https?:\/\/)?(?:www\.)?youtu(?:\.be|(?:be|be-nocookie)\.com)\/(?
 
 module.exports = async (value, fast) => {
   if (typeof value !== 'string') throw Error('Invalid value')
+
   value = value.trim()
   if (value.match(/^\/\w/)) value = req.base + value
   let res = {}

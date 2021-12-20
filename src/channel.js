@@ -14,6 +14,7 @@ let TABS = {
 
 module.exports = async (id, opts = {}) => {
   if (typeof id !== 'string') throw Error('Invalid value')
+
   let body = await req.api('browse', { browseId: id, params: TABS.about })
   if (!body || !body.contents || !body.metadata) throw Error('Invalid channel')
 

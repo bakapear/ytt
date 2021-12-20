@@ -5,6 +5,7 @@ let req = require('./lib/request')
 
 module.exports = async (id) => {
   if (typeof id !== 'string') throw Error('Invalid value')
+
   let body = await req.api('get_transcript', { params: Buffer.from([10, id.length, ...Buffer.from(id)]).toString('base64') })
   if (!body || id.length !== 11) throw Error('Invalid video')
   if (!body.actions) throw Error('Video does not have a transcript')

@@ -4,6 +4,7 @@ let req = require('./lib/request')
 
 module.exports = async (id, opts = {}) => {
   if (typeof id !== 'string') throw Error('Invalid value')
+
   let player = await req.api('player', { videoId: id })
   let body = await req.api('next', { videoId: id })
   if (player.playabilityStatus.status === 'ERROR') throw Error('Invalid video')

@@ -4,6 +4,7 @@ let req = require('./lib/request')
 
 module.exports = async (id, opts = {}) => {
   if (typeof id !== 'string') throw Error('Invalid value')
+
   let body = await req.api('browse', { browseId: 'VL' + id, params: opts.all ? 'wgYCCAA=' : '' })
   if (!body.contents) throw Error('Invalid playlist')
 

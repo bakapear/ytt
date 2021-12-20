@@ -13,6 +13,7 @@ let FILTERS = {
 
 module.exports = async (query, opts = {}) => {
   if (typeof query !== 'string') throw Error('Invalid value')
+
   let body = await req.api('search', { query, params: getFilterParams(opts) })
   body.query = query
 
