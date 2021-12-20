@@ -1,4 +1,4 @@
-let { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist } = require('./lib/structure')
+let { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 

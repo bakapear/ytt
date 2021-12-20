@@ -1,4 +1,4 @@
-let { YoutubeTranscript } = require('./lib/structure')
+let { YoutubeTranscript } = require('./lib/structs')
 
 let util = require('./lib/util')
 let req = require('./lib/request')

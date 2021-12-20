@@ -1,4 +1,4 @@
-let struct = require('../src/lib/structure')
+let struct = require('../src/lib/structs')
 let ytt = require('../')
 
 let INVALID = [undefined, null, NaN, {}, []]
