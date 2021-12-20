@@ -2,7 +2,7 @@ let { YoutubeFormats } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (id, opts = {}) => {
+module.exports = async (id) => {
   if (typeof id !== 'string') throw Error('Invalid value')
 
   let body = await req.api('player', { videoId: id, context: { client: { clientName: 'ANDROID', clientVersion: '16.50' } } })
