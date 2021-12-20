@@ -102,8 +102,8 @@ async function fetchComments (next) {
     if (rep) {
       rep = {
         fetch: fetchComments,
-        continuation: rep.contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token,
-        size: util.num(rep.viewReplies.buttonRenderer.text.runs[1]?.text)
+        continuation: rep.contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+        // size: util.num(rep.viewReplies.buttonRenderer.text.runs[1]?.text)
       }
     }
 
@@ -132,8 +132,8 @@ async function fetchComments (next) {
     }))
   }
 
-  let count = util.num(data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand?.continuationItems[0].commentsHeaderRenderer.commentsCount)
-  if (count) this.size = count
+  // let count = util.num(data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand?.continuationItems[0].commentsHeaderRenderer.commentsCount)
+  // if (count) this.size = count
 
   return { items: util.removeEmpty(res), continuation: token || null }
 }
