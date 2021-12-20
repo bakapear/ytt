@@ -2,6 +2,7 @@ function YoutubeSearch (data) {
   this.query = data.query
   this.suggested = data.suggested
   this.corrected = data.corrected
+  this.size = data.size
   if (data.results) next.call(this, data, 'results')
 }
 
@@ -36,6 +37,7 @@ function YoutubeChannel (data) {
   this.verified = data.verified
   this.title = data.title
   this.description = data.description
+  this.size = data.size
   this.views = data.views
   this.subscribers = data.subscribers
   this.date = data.date
@@ -56,6 +58,7 @@ function YoutubePlaylist (data) {
   this.type = data.type
   this.title = data.title
   this.description = data.description
+  this.size = data.size
   this.views = data.views
   this.date = data.date
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
@@ -133,7 +136,6 @@ function YoutubeChapter (data) {
 function next (data, prop) {
   if (!data[prop].continuation) return
   this[prop] = []
-  if (data[prop].size) this[prop].size = data[prop].size
   Object.defineProperties(this[prop], {
     continuation: { enumerable: false, writable: true, value: data[prop].continuation },
     fetch: { enumerable: false, value: data[prop].fetch },

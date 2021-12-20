@@ -29,6 +29,7 @@ function makePlaylistObject (data) {
     type: micro.unlisted ? 'unlisted' : 'public',
     title: micro.title,
     description: micro.description,
+    size: util.num(info.stats[0]),
     views: util.num(info.stats[1]),
     date: util.date(info.stats[2]),
     thumbnail: micro.thumbnail.thumbnails,
@@ -39,7 +40,7 @@ function makePlaylistObject (data) {
       title: util.text(owner.title),
       avatar: owner.thumbnail.thumbnails
     },
-    videos: { fetch: fetchVideos, continuation: true, size: util.num(info.stats[0]) }
+    videos: { fetch: fetchVideos, continuation: true }
   })
 }
 
