@@ -3,6 +3,8 @@ let util = require('./lib/util')
 let req = require('./lib/request')
 
 module.exports = async (id, opts = {}) => {
+  if (typeof id !== 'string') throw Error('Invalid value')
+
   let body = await req.api('player', { videoId: id, context: { client: { clientName: 'ANDROID', clientVersion: '16.50' } } })
   if (body.playabilityStatus.status === 'ERROR') throw Error('Invalid video')
 
