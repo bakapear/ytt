@@ -6,8 +6,9 @@ module.exports = async (id, opts = {}) => {
   if (typeof id !== 'string') throw Error('Invalid value')
 
   let player = await req.api('player', { videoId: id })
+  if (player.playabilityStatus.status !== 'OK') throw Error('Invalid video')
+
   let body = await req.api('next', { videoId: id })
-  if (player.playabilityStatus.status === 'ERROR') throw Error('Invalid video')
 
   let video = makeVideoObject({ ...body, ...player })
 
