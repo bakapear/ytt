@@ -10,9 +10,11 @@ module.exports = async (id, index) => {
 
   let list = makePlaylistObject(body)
 
-  let res = await fetchVideos(null, body)
-  list.videos.push(...res.items)
-  list.videos.continuation = res.continuation
+  if (list.videos) {
+    let res = await fetchVideos(null, body)
+    list.videos.push(...res.items)
+    list.videos.continuation = res.continuation
+  }
 
   return util.removeEmpty(list)
 }
@@ -25,7 +27,7 @@ function makePlaylistObject (data) {
   let owner = items[1].playlistSidebarSecondaryInfoRenderer.videoOwner.videoOwnerRenderer
 
   return new YoutubePlaylist({
-    id: info.navigationEndpoint.watchEndpoint.playlistId,
+    id: util.between(micro.urlCanonical, '='),
     type: micro.unlisted ? 'unlisted' : 'public',
     title: micro.title,
     description: micro.description,
@@ -40,16 +42,16 @@ function makePlaylistObject (data) {
       title: util.text(owner.title),
       avatar: owner.thumbnail.thumbnails
     },
-    videos: { fetch: fetchVideos, continuation: true }
+    videos: { fetch: fetchVideos, continuation: !!data.onResponseReceivedActions }
   })
 }
 
 async function fetchVideos (next, data) {
   if (!data) data = await req.api('browse', { continuation: next })
 
-  let contents = data.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems
+  let contents = data.onResponseReceivedActions?.[0].appendContinuationItemsAction.continuationItems || []
 
-  let token = contents[contents.length - 1].continuationItemRenderer?.continuationEndpoint.continuationCommand.token
+  let token = contents[contents.length - 1]?.continuationItemRenderer?.continuationEndpoint.continuationCommand.token
 
   let res = []
 
