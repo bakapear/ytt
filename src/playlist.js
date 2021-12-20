@@ -2,10 +2,10 @@ let { YoutubeVideo, YoutubePlaylist } = require('./lib/structure')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (id, opts = {}) => {
+module.exports = async (id, index) => {
   if (typeof id !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('browse', { browseId: 'VL' + id, params: opts.all ? 'wgYCCAA=' : '' })
+  let body = await req.api('browse', { continuation: genToken(id, index || 1) })
   if (!body.contents) throw Error('Invalid playlist')
 
   let list = makePlaylistObject(body)
@@ -44,16 +44,9 @@ function makePlaylistObject (data) {
 }
 
 async function fetchVideos (next, data) {
-  let contents = null
+  if (!data) data = await req.api('browse', { continuation: next })
 
-  if (!data) {
-    data = await req.api('browse', { continuation: next })
-    contents = data.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems
-  } else {
-    contents = data.contents.twoColumnBrowseResultsRenderer.tabs[0]
-      .tabRenderer.content.sectionListRenderer.contents[0]
-      .itemSectionRenderer.contents[0].playlistVideoListRenderer.contents
-  }
+  let contents = data.onResponseReceivedActions[0].appendContinuationItemsAction.continuationItems
 
   let token = contents[contents.length - 1].continuationItemRenderer?.continuationEndpoint.continuationCommand.token
 
@@ -93,4 +86,17 @@ async function fetchVideos (next, data) {
   }
 
   return { items: util.removeEmpty(res), continuation: token || null }
+}
+
+function genToken (id, i = 1) {
+  i = i <= 0 ? 0 : (i - 1)
+  let g = [194, 6, 2, 8, 0] // include unavailable videos
+  let f = [i % 128, Math.floor(i / 128)]
+  f[1] > 0 ? f[0] += 128 : f.pop()
+  let e = Buffer.from([8, ...f]).toString('base64')
+  let d = [80, 84, 58, ...Buffer.from(e)]
+  let c = Buffer.from([8, 0, 122, ...util.stb(d), ...g]).toString('base64')
+  let b = [18, ...util.stb('VL' + id), 26, ...util.stb(encodeURIComponent(c)), 154, 2, ...util.stb(id)]
+  let a = [226, 169, 133, 178, 2, ...util.stb(b)]
+  return Buffer.from(a).toString('base64')
 }

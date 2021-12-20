@@ -1,4 +1,7 @@
 module.exports = {
+  stb (str) {
+    return [str.length, ...(Array.isArray(str) ? str : Buffer.from(str))]
+  },
   between (str, a, b, c = 0, d = 0) {
     if (!str) return null
     if (a instanceof RegExp) a = str.match(a)?.[0]
