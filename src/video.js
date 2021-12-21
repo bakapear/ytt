@@ -29,12 +29,6 @@ function makeVideoObject (data) {
   let owner = secondary.owner.videoOwnerRenderer
   let views = primary.viewCount.videoViewCountRenderer
 
-  let com = contents[contents.length - 1].itemSectionRenderer?.contents[0].continuationItemRenderer
-  if (com) {
-    com = com.continuationEndpoint.continuationCommand.token
-    com = { fetch: fetchComments, continuation: com }
-  }
-
   let ratings = details.allowRatings
 
   let chapters = data.playerOverlays.playerOverlayRenderer.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer.playerBar.multiMarkersPlayerBarRenderer.markersMap[0].value.chapters
@@ -64,6 +58,7 @@ function makeVideoObject (data) {
     category: micro.category,
     tags: details.keywords,
     date: util.date(primary.dateText),
+    // comments, // TODO: generate request that includes comment size
     channel: {
       id: owner.navigationEndpoint.browseEndpoint.browseId,
       legacy: util.between(micro.ownerProfileUrl, '/user/'),
@@ -74,8 +69,7 @@ function makeVideoObject (data) {
       subscribers: util.num(owner.subscriberCountText)
     },
     chapters: chapters,
-    related: { fetch: fetchRelated, continuation: true },
-    comments: com
+    related: { fetch: fetchRelated, continuation: true }
   })
 }
 
