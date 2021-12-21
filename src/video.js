@@ -1,4 +1,4 @@
-let { YoutubeVideo, YoutubeComment } = require('./lib/structs')
+let { YoutubeVideo } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -77,65 +77,6 @@ function makeVideoObject (data) {
     related: { fetch: fetchRelated, continuation: true },
     comments: com
   })
-}
-
-async function fetchComments (next) {
-  let data = await req.api('next', { continuation: next })
-
-  let contents = data.onResponseReceivedEndpoints[0].appendContinuationItemsAction?.continuationItems
-  if (!contents) contents = data.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
-  if (!contents) return { items: [], continuation: null }
-
-  let token = contents[contents.length - 1].continuationItemRenderer
-  if (token) {
-    token = token.button?.buttonRenderer.command || token.continuationEndpoint
-    token = token.continuationCommand.token
-  }
-
-  let res = []
-
-  for (let item of contents) {
-    let com = item.commentThreadRenderer?.comment.commentRenderer || item.commentRenderer
-    if (!com) continue
-
-    let rep = item.commentThreadRenderer?.replies?.commentRepliesRenderer
-    if (rep) {
-      rep = {
-        fetch: fetchComments,
-        continuation: rep.contents[0].continuationItemRenderer.continuationEndpoint.continuationCommand.token
-        // size: util.num(rep.viewReplies.buttonRenderer.text.runs[1]?.text)
-      }
-    }
-
-    let date = util.text(com.publishedTimeText)
-    let edit = date.indexOf('(edited)')
-    if (edit !== -1) date = date.substr(0, edit)
-
-    res.push(new YoutubeComment({
-      id: com.commentId,
-      edited: edit >= 0,
-      hearted: !!com.actionButtons.commentActionButtonsRenderer.creatorHeart,
-      pinned: !!com.pinnedCommentBadge,
-      owner: com.authorIsChannelOwner,
-      text: util.text(com.contentText),
-      likes: util.num(com.voteCount),
-      date: util.date(date),
-      channel: {
-        id: com.authorEndpoint.browseEndpoint.browseId,
-        legacy: util.between(com.authorEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
-        custom: util.between(com.authorEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
-        title: util.text(com.authorText),
-        verified: !!com.authorCommentBadge,
-        avatar: com.authorThumbnail.thumbnails
-      },
-      replies: rep
-    }))
-  }
-
-  // let count = util.num(data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand?.continuationItems[0].commentsHeaderRenderer.commentsCount)
-  // if (count) this.size = count
-
-  return { items: util.removeEmpty(res), continuation: token || null }
 }
 
 async function fetchRelated (next, data) {
