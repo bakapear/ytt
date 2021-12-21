@@ -1,3 +1,5 @@
+let { next } = require('./util')
+
 function YoutubeSearch (data) {
   this.query = data.query
   this.suggested = data.suggested
@@ -22,12 +24,12 @@ function YoutubeVideo (data) {
   this.dislikes = data.dislikes
   this.category = data.category
   this.tags = data.tags
+  this.comments = data.comments
   if (data.chapters) this.chapters = data.chapters.map(x => new YoutubeChapter(x))
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
   if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
 
   if (data.related) next.call(this, data, 'related')
-  if (data.comments) next.call(this, data, 'comments')
 }
 
 function YoutubeChannel (data) {
@@ -122,37 +124,14 @@ function YoutubeComment (data) {
   this.text = data.text
   this.likes = data.likes
   this.date = data.date
+  this.replies = data.replies
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
-
-  if (data.replies) next.call(this, data, 'replies')
 }
 
 function YoutubeChapter (data) {
   this.title = data.title
   this.offset = data.offset
   this.thumbnail = new YoutubeThumbnails(data.thumbnail)
-}
-
-function next (data, prop) {
-  if (!data[prop].continuation) return
-  this[prop] = []
-  Object.defineProperties(this[prop], {
-    continuation: { enumerable: false, writable: true, value: data[prop].continuation },
-    fetch: { enumerable: false, value: data[prop].fetch },
-    next: {
-      enumerable: false,
-      value: async (steps = 1) => {
-        let step = 0
-        let last = this[prop].length
-        while (this[prop].continuation && step++ < steps) {
-          let res = await this[prop].fetch(this[prop].continuation)
-          this[prop].continuation = res.continuation
-          this[prop].push(...res.items)
-        }
-        return this[prop].slice(last)
-      }
-    }
-  })
 }
 
 module.exports = { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist, YoutubeFormats, YoutubeTranscript, YoutubeComment }

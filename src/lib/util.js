@@ -60,5 +60,26 @@ module.exports = {
     if (!str) return null
     if (typeof str !== 'string') str = this.text(str)
     return str.replace(/(Joined|Started streaming on)/, '').trim()
+  },
+  next (data, prop) {
+    if (!data[prop].continuation) return
+    this[prop] = []
+    Object.defineProperties(this[prop], {
+      continuation: { enumerable: false, writable: true, value: data[prop].continuation },
+      fetch: { enumerable: false, value: data[prop].fetch },
+      next: {
+        enumerable: false,
+        value: async (steps = 1) => {
+          let step = 0
+          let last = this[prop].length
+          while (this[prop].continuation && step++ < steps) {
+            let res = await this[prop].fetch(this[prop].continuation)
+            this[prop].continuation = res.continuation
+            this[prop].push(...res.items)
+          }
+          return this[prop].slice(last)
+        }
+      }
+    })
   }
 }
