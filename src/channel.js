@@ -12,10 +12,10 @@ let TABS = {
   search: 'EgZzZWFyY2g='
 }
 
-module.exports = async (id, opts = {}) => {
-  if (typeof id !== 'string') throw Error('Invalid value')
+module.exports = async (channelId, opts = {}) => {
+  if (typeof channelId !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('browse', { browseId: id, params: TABS.about })
+  let body = await req.api('browse', { browseId: channelId, params: TABS.about })
   if (!body || !body.contents || !body.metadata) throw Error('Invalid channel')
 
   let chan = makeChannelObject(body)

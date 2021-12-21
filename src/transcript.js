@@ -3,11 +3,11 @@ let { YoutubeTranscript } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (id) => {
-  if (typeof id !== 'string') throw Error('Invalid value')
+module.exports = async (videoId) => {
+  if (typeof videoId !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('get_transcript', { params: Buffer.from([10, id.length, ...Buffer.from(id)]).toString('base64') })
-  if (!body || id.length !== 11) throw Error('Invalid video')
+  let body = await req.api('get_transcript', { params: Buffer.from([10, videoId.length, ...Buffer.from(videoId)]).toString('base64') })
+  if (!body || videoId.length !== 11) throw Error('Invalid video')
   if (!body.actions) throw Error('Video does not have a transcript')
 
   let trans = makeTranscriptObject(body)

@@ -2,13 +2,13 @@ let { YoutubeVideo, YoutubeComment } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (id, opts = {}) => {
-  if (typeof id !== 'string') throw Error('Invalid value')
+module.exports = async (videoId, opts = {}) => {
+  if (typeof videoId !== 'string') throw Error('Invalid value')
 
-  let player = await req.api('player', { videoId: id })
+  let player = await req.api('player', { videoId: videoId })
   if (player.playabilityStatus.status !== 'OK') throw Error('Invalid video')
 
-  let body = await req.api('next', { videoId: id })
+  let body = await req.api('next', { videoId: videoId })
 
   let video = makeVideoObject({ ...body, ...player })
 

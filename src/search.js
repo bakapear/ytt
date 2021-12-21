@@ -11,10 +11,10 @@ let FILTERS = {
   sort: ['relevance', 'rating', 'age', 'views']
 }
 
-module.exports = async (query, opts = {}) => {
+module.exports = async (query, filters = {}) => {
   if (typeof query !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('search', { query, params: getFilterParams(opts) })
+  let body = await req.api('search', { query, params: getFilterParams(filters) })
   body.query = query
 
   let search = makeSearchObject(body)
@@ -122,16 +122,16 @@ async function fetchResults (next, data) {
   return { items: util.removeEmpty(res), continuation: token || null }
 }
 
-function getFilterParams (opts) {
-  if (!opts) return ''
+function getFilterParams (filters) {
+  if (!filters) return ''
   let arr = new Uint8Array(50)
   let i = 0
   let c = 0
   let w = (type, num, offs) => {
-    if (opts[type]) {
-      if (!offs && opts[type] === FILTERS[type][0]) return
+    if (filters[type]) {
+      if (!offs && filters[type] === FILTERS[type][0]) return
       arr[i++] = num
-      arr[i++] = FILTERS[type].indexOf(opts[type]) + offs
+      arr[i++] = FILTERS[type].indexOf(filters[type]) + offs
     }
   }
   w(arr, i, 'sort', 8, 0)
@@ -140,8 +140,8 @@ function getFilterParams (opts) {
   w('period', 8, 1)
   w('type', 16, 1)
   w('duration', 24, 1)
-  if (opts.features?.length) {
-    for (let f of opts.features) {
+  if (filters.features?.length) {
+    for (let f of filters.features) {
       let k = FMAP[FILTERS.features.indexOf(f)]
       arr[i++] = k
       if (k >= 128) arr[i++]++

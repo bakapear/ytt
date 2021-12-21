@@ -2,10 +2,10 @@ let { YoutubeVideo, YoutubePlaylist } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (id, index) => {
-  if (typeof id !== 'string') throw Error('Invalid value')
+module.exports = async (playlistId, index) => {
+  if (typeof playlistId !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('browse', { continuation: genToken(id, index || 1) })
+  let body = await req.api('browse', { continuation: genToken(playlistId, index || 1) })
   if (!body.contents) throw Error('Invalid playlist')
 
   let list = makePlaylistObject(body)
