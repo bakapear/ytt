@@ -2,7 +2,7 @@ let { YoutubeVideo, YoutubeComment } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (videoId, opts = {}) => {
+module.exports = async (videoId) => {
   if (typeof videoId !== 'string') throw Error('Invalid value')
 
   let player = await req.api('player', { videoId: videoId })
