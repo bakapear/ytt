@@ -16,6 +16,10 @@ module.exports = async (videoId) => {
   video.related.push(...res.items)
   video.related.continuation = res.continuation
 
+  Object.defineProperty(video, 'update', {
+    enumerable: false, value: updateMetadata
+  })
+
   return util.removeEmpty(video)
 }
 
@@ -116,4 +120,28 @@ async function fetchRelated (next, data) {
     }
   }
   return { items: util.removeEmpty(res), continuation: token || null }
+}
+
+async function updateMetadata () {
+  let fnd = (a, x, y) => {
+    let f = a.find(x)
+    if (f) y(x(f))
+  }
+  let body = await req.api('updated_metadata', { videoId: this.id })
+  if (body.actions) {
+    fnd(body.actions, x => x.updateViewershipAction, x => {
+      this.viewers = util.num(x.viewCount.videoViewCountRenderer.viewCount)
+    })
+    fnd(body.actions, x => x.updateDateTextAction, x => {
+      this.date = util.date(x.dateText)
+    })
+    fnd(body.actions, x => x.updateTitleAction, x => {
+      this.title = util.text(x.title)
+    })
+    fnd(body.actions, x => x.updateDescriptionAction, x => {
+      this.title = util.text(x.description)
+    })
+    return true
+  }
+  return false
 }
