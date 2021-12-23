@@ -37,6 +37,7 @@ function YoutubeChannel (data) {
   this.legacy = data.legacy
   this.custom = data.custom
   this.verified = data.verified
+  this.generated = data.generated
   this.title = data.title
   this.description = data.description
   this.size = data.size
@@ -44,6 +45,9 @@ function YoutubeChannel (data) {
   this.subscribers = data.subscribers
   this.date = data.date
   this.tags = data.tags
+  this.labels = data.labels
+  this.year = data.year
+  this.devs = data.devs
   if (data.avatar) this.avatar = new YoutubeThumbnails(data.avatar)
   if (data.banner) this.banner = new YoutubeThumbnails(data.banner)
 

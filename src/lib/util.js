@@ -39,6 +39,7 @@ module.exports = {
   },
   text (obj) {
     if (!obj) return null
+    if (typeof obj === 'string') return obj
     return obj.simpleText || obj.runs.map(x => x.text).join('')
   },
   time (str) {
