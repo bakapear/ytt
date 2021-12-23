@@ -16,7 +16,7 @@ module.exports = async (videoId, commentId) => {
 
 async function fetchComments (next) {
   let data = await req.api('next', { continuation: next })
-  if (!data.onResponseReceivedEndpoints) throw Error('Could not retrieve comments.')
+  if (!data.onResponseReceivedEndpoints) throw Error('Could not retrieve comments')
   let contents = data.onResponseReceivedEndpoints[0].appendContinuationItemsAction?.continuationItems
   if (!contents) contents = data.onResponseReceivedEndpoints[1].reloadContinuationItemsCommand.continuationItems
   if (!contents) return { items: [], continuation: null }
