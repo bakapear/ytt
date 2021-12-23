@@ -13,7 +13,6 @@ function YoutubeVideo (data) {
   this.index = data.index
   this.type = data.type
   this.live = data.live
-  this.new = data.new
   this.title = data.title
   this.description = data.description
   this.duration = data.duration
@@ -24,6 +23,7 @@ function YoutubeVideo (data) {
   this.dislikes = data.dislikes
   this.category = data.category
   this.tags = data.tags
+  this.labels = data.labels
   this.comments = data.comments
   if (data.chapters) this.chapters = data.chapters.map(x => new YoutubeChapter(x))
   if (data.channel) this.channel = new YoutubeChannel(data.channel)

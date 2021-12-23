@@ -65,7 +65,7 @@ async function fetchResults (next, data) {
           id: vid.videoId,
           type: 'public',
           live: live,
-          new: !!vid.badges?.some(x => x.metadataBadgeRenderer.label === 'New'),
+          labels: vid.badges?.map(x => x.metadataBadgeRenderer.label),
           thumbnail: vid.thumbnail.thumbnails,
           title: util.text(vid.title),
           description: util.text(vid.detailedMetadataSnippets?.[0].snippetText),
