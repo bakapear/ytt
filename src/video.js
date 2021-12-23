@@ -175,10 +175,7 @@ async function fetchRelated (next, data) {
 }
 
 async function updateMetadata () {
-  let fnd = (a, x, y) => {
-    let f = a.find(x)
-    if (f) y(x(f))
-  }
+  let fnd = (a, b, c) => (a = a.find(b)) && c(b(a))
   let body = await req.api('updated_metadata', { videoId: this.id })
   if (body.actions) {
     fnd(body.actions, x => x.updateViewershipAction, x => {
