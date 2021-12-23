@@ -27,6 +27,9 @@ function YoutubeVideo (data) {
   this.comments = data.comments
   if (data.chapters) this.chapters = data.chapters.map(x => new YoutubeChapter(x))
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
+  if (data.game) this.game = new YoutubeChannel(data.game)
+  if (data.topic) this.topic = new YoutubeChannel(data.topic)
+  if (data.songs) this.songs = data.songs.map(x => new YoutubeSong(x))
   if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
 
   if (data.related) next.call(this, data, 'related')
@@ -141,6 +144,15 @@ function YoutubeChapter (data) {
   this.title = data.title
   this.offset = data.offset
   this.thumbnail = new YoutubeThumbnails(data.thumbnail)
+}
+
+function YoutubeSong (data) {
+  this.title = data.title
+  this.artist = data.artist
+  this.album = data.album
+  this.license = data.license
+  if (data.video) this.video = new YoutubeVideo(data.video)
+  if (data.channel) this.channel = new YoutubeChannel(data.channel)
 }
 
 module.exports = { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist, YoutubeFormats, YoutubeTranscript, YoutubeComment }

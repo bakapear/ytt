@@ -47,6 +47,52 @@ function makeVideoObject (data) {
     })
   }
 
+  let rows = secondary.metadataRowContainer.metadataRowContainerRenderer.rows
+  let game, topic
+  let songs = []
+  if (rows) {
+    for (let i = 0; i < rows.length; i++) {
+      let r = rows[i]
+      if (r.richMetadataRenderer) {
+        r = r.richMetadataRenderer
+        let b = {
+          id: r.endpoint.browseEndpoint.browseId,
+          title: util.text(r.title),
+          year: util.num(r.subtitle),
+          avatar: r.thumbnail.thumbnails
+        }
+        if (r.style === 'RICH_METADATA_RENDERER_STYLE_BOX_ART') game = b
+        else if (r.style === 'RICH_METADATA_RENDERER_STYLE_TOPIC') topic = b
+      } else if (r.metadataRowRenderer) {
+        r = r.metadataRowRenderer
+        let content = r.contents[0]
+        let link = content.runs?.[0].navigationEndpoint
+        switch (util.text(r.title)) {
+          case 'Song': {
+            songs.push({
+              title: util.text(content),
+              video: link ? { id: link.watchEndpoint.videoId } : null
+            })
+            break
+          }
+          case 'Artist': {
+            songs[songs.length - 1].artist = util.text(content)
+            if (link) songs[songs.length - 1].channel = { id: link.browseEndpoint.browseId }
+            break
+          }
+          case 'Album': {
+            songs[songs.length - 1].album = util.text(content)
+            break
+          }
+          case 'Licensed to YouTube by': {
+            songs[songs.length - 1].license = util.text(content)
+            break
+          }
+        }
+      }
+    }
+  }
+
   return new YoutubeVideo({
     id: details.videoId,
     live: !!details.isLiveContent,
@@ -72,7 +118,10 @@ function makeVideoObject (data) {
       verified: !!owner.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'),
       subscribers: util.num(owner.subscriberCountText)
     },
-    chapters: chapters,
+    game,
+    topic,
+    songs: songs.length ? songs : null,
+    chapters,
     related: { fetch: fetchRelated, continuation: true }
   })
 }
