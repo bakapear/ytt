@@ -2,20 +2,10 @@ let { YoutubeChannel } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-let TABS = {
-  home: 'EghmZWF0dXJlZA==',
-  videos: 'EgZ2aWRlb3M=',
-  playlists: 'EglwbGF5bGlzdHM=',
-  community: 'Egljb21tdW5pdHk=',
-  channels: 'EghjaGFubmVscw==',
-  about: 'EgVhYm91dA==',
-  search: 'EgZzZWFyY2g='
-}
-
 module.exports = async (channelId, opts = {}) => {
   if (typeof channelId !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('browse', { browseId: channelId, params: TABS.about })
+  let body = await req.api('browse', { browseId: channelId, params: genToken('about') })
   if (!body || !body.contents || !body.metadata) throw Error('Invalid channel')
 
   let chan = makeChannelObject(body)
@@ -46,4 +36,9 @@ function makeChannelObject (data) {
     avatar: header.avatar.thumbnails,
     banner: header.banner ? [...header.banner.thumbnails, ...header.tvBanner.thumbnails, ...header.mobileBanner.thumbnails] : null
   })
+}
+
+function genToken (page) {
+  if (page === 'home') page = 'featured'
+  return Buffer.from([18, ...util.stb(page)]).toString('base64')
 }
