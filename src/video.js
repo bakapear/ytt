@@ -53,39 +53,42 @@ function makeVideoObject (data) {
   if (rows) {
     for (let i = 0; i < rows.length; i++) {
       let r = rows[i]
-      if (r.richMetadataRenderer) {
-        r = r.richMetadataRenderer
-        let b = {
-          id: r.endpoint.browseEndpoint.browseId,
-          title: util.text(r.title),
-          year: util.num(r.subtitle),
-          avatar: r.thumbnail.thumbnails
+      if (r.richMetadataRowRenderer) {
+        for (let c of r.richMetadataRowRenderer.contents) {
+          c = c.richMetadataRenderer
+          let b = {
+            id: c.endpoint.browseEndpoint.browseId,
+            title: util.text(c.title),
+            year: util.num(c.subtitle),
+            avatar: c.thumbnail.thumbnails
+          }
+          if (c.style === 'RICH_METADATA_RENDERER_STYLE_BOX_ART') game = b
+          else if (c.style === 'RICH_METADATA_RENDERER_STYLE_TOPIC') topic = b
         }
-        if (r.style === 'RICH_METADATA_RENDERER_STYLE_BOX_ART') game = b
-        else if (r.style === 'RICH_METADATA_RENDERER_STYLE_TOPIC') topic = b
       } else if (r.metadataRowRenderer) {
         r = r.metadataRowRenderer
         let content = r.contents[0]
         let link = content.runs?.[0].navigationEndpoint
+
+        if (!songs.length || r.hasDividerLine) songs.push({})
+        let last = songs.length - 1
         switch (util.text(r.title)) {
           case 'Song': {
-            songs.push({
-              title: util.text(content),
-              video: link ? { id: link.watchEndpoint.videoId } : null
-            })
+            songs[last].title = util.text(content)
+            if (link) songs[last].video = { id: link.watchEndpoint.videoId }
             break
           }
           case 'Artist': {
-            songs[songs.length - 1].artist = util.text(content)
-            if (link) songs[songs.length - 1].channel = { id: link.browseEndpoint.browseId }
+            songs[last].artist = util.text(content)
+            if (link) songs[last].channel = { id: link.browseEndpoint.browseId }
             break
           }
           case 'Album': {
-            songs[songs.length - 1].album = util.text(content)
+            songs[last].album = util.text(content)
             break
           }
           case 'Licensed to YouTube by': {
-            songs[songs.length - 1].license = util.text(content)
+            songs[last].license = util.text(content)
             break
           }
         }
