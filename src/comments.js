@@ -4,9 +4,16 @@ let req = require('./lib/request')
 
 module.exports = async (videoId, commentId) => {
   if (typeof videoId !== 'string') throw Error('Invalid value')
+
+  let sortType = 0
+  if (!isNaN(commentId)) {
+    sortType = commentId
+    commentId = ''
+  }
+
   if (commentId && typeof commentId !== 'string') throw Error('Invalid value')
 
-  let data = { items: { fetch: fetchComments, continuation: genToken(videoId, commentId) } }
+  let data = { items: { fetch: fetchComments, continuation: genToken(videoId, commentId, sortType) } }
 
   let out = {}
   util.next.call(out, data, 'items')
@@ -64,8 +71,8 @@ async function fetchComments (next) {
   return { items: util.removeEmpty(res), continuation: token || null }
 }
 
-function genToken (vid, cid) {
-  let a = [...util.stb([34, 17, 34, ...util.stb(vid), 48, 0, 120, 2])]
+function genToken (vid, cid, sortType) {
+  let a = [...util.stb([34, 17, 34, ...util.stb(vid), 48, sortType, 120, 2])]
   if (cid) {
     // TODO: find way to get rid of Array(24)
     let b = [...util.stb(Array(24)), 50, ...util.stb(vid), 64, 1, 72, 10]
