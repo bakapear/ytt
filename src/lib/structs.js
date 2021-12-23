@@ -104,9 +104,14 @@ function YoutubeThumbnail (data) {
 }
 
 function YoutubeTranscript (data) {
-  this.language = data.language
   this.cues = data.cues.map(x => new YoutubeTranscriptCue(x))
-  if (data.langs) this.langs = data.langs
+  if (data.langs) this.langs = data.langs.map(x => new YouTubeTranscriptLanguage(x))
+}
+
+function YouTubeTranscriptLanguage (data) {
+  this.current = data.current
+  this.title = data.title
+  this.code = data.code
 }
 
 function YoutubeTranscriptCue (data) {
