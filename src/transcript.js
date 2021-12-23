@@ -24,7 +24,7 @@ function makeTranscriptObject (data) {
     return {
       current: x.selected,
       title: x.title,
-      code: getLangFromToken(x.continuation.reloadContinuationData.continuation)
+      code: langs.length > 1 ? getLangFromToken(x.continuation.reloadContinuationData.continuation) : null
     }
   })
   if (!langs.length) langs = null
