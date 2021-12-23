@@ -53,13 +53,6 @@ function YoutubeChannel (data) {
   this.devs = data.devs
   if (data.avatar) this.avatar = new YoutubeThumbnails(data.avatar)
   if (data.banner) this.banner = new YoutubeThumbnails(data.banner)
-
-  // TODO: all of the things below
-  if (data.videos) next.call(this, data, 'videos')
-  if (data.playlists) next.call(this, data, 'playlists')
-  if (data.posts) next.call(this, data, 'posts')
-  if (data.channels) next.call(this, data, 'channels')
-  if (data.search) { /* search function here */ }
 }
 
 function YoutubePlaylist (data) {
