@@ -101,7 +101,7 @@ function makeVideoObject (data) {
     stream: views.isLive || details.isLiveContent || null,
     premiere: util.text(primary.dateText)?.indexOf('Premiere') !== -1 || null,
     title: details.title,
-    type: micro.isUnlisted ? 'unlisted' : 'public',
+    unlisted: micro.isUnlisted || null,
     description: details.shortDescription,
     thumbnail: details.thumbnail.thumbnails,
     duration: Number(details.lengthSeconds) * 1000,
@@ -150,7 +150,6 @@ async function fetchRelated (next, data) {
         let live = !!vid.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_LIVE_NOW')
         res.push(new YoutubeVideo({
           id: vid.videoId,
-          type: 'public',
           live: live || null,
           stream: live || util.text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
           labels: vid.badges?.map(x => x.metadataBadgeRenderer.label),

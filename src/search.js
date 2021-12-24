@@ -63,7 +63,6 @@ async function fetchResults (next, data) {
         let live = !!vid.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_LIVE_NOW')
         res.push(new YoutubeVideo({
           id: vid.videoId,
-          type: 'public',
           live: live || null,
           stream: live || util.text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
           labels: vid.badges?.map(x => x.metadataBadgeRenderer.label),
@@ -104,7 +103,6 @@ async function fetchResults (next, data) {
         let owner = list.shortBylineText.runs[0]
         res.push(new YoutubePlaylist({
           id: list.playlistId,
-          type: 'public',
           title: util.text(list.title),
           thumbnail: list.thumbnails[0].thumbnails,
           size: Number(list.videoCount),

@@ -11,7 +11,7 @@ function YoutubeSearch (data) {
 function YoutubeVideo (data) {
   this.id = data.id
   this.index = data.index
-  this.type = data.type
+  this.unlisted = data.unlisted
   this.live = data.live
   this.stream = data.stream
   this.premiere = data.premiere
@@ -59,7 +59,7 @@ function YoutubeChannel (data) {
 
 function YoutubePlaylist (data) {
   this.id = data.id
-  this.type = data.type
+  this.unlisted = data.unlisted
   this.title = data.title
   this.description = data.description
   this.size = data.size

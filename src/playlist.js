@@ -28,7 +28,7 @@ function makePlaylistObject (data) {
 
   return new YoutubePlaylist({
     id: util.between(micro.urlCanonical, '='),
-    type: micro.unlisted ? 'unlisted' : 'public',
+    unlisted: micro.unlisted || null,
     title: micro.title,
     description: micro.description,
     size: util.num(info.stats[0]) || 0,
@@ -64,7 +64,6 @@ async function fetchVideos (next, data) {
         id: vid.videoId,
         live: !vid.lengthSeconds || null,
         stream: !vid.lengthSeconds || null,
-        type: 'public',
         thumbnail: vid.thumbnail.thumbnails,
         title: util.text(vid.title),
         index: util.num(vid.index),
@@ -80,7 +79,6 @@ async function fetchVideos (next, data) {
       let title = util.text(vid.title)
       res.push(new YoutubeVideo({
         id: vid.videoId,
-        type: title.match(/\[(.*?) /)[1].toLowerCase(),
         thumbnail: vid.thumbnail.thumbnails,
         title: title,
         index: util.num(vid.index)
