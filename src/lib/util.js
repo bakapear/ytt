@@ -60,7 +60,7 @@ module.exports = {
   date (str) {
     if (!str) return null
     if (typeof str !== 'string') str = this.text(str)
-    return str.replace(/(Joined|Started streaming on)/, '').trim()
+    return str.replace(/(Started streaming on|Streamed live on|Streamed|Premiered|Joined)/, '').trim()
   },
   next (data, prop) {
     if (!data[prop].continuation) return
