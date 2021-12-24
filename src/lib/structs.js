@@ -12,6 +12,8 @@ function YoutubeVideo (data) {
   this.id = data.id
   this.index = data.index
   this.unlisted = data.unlisted
+  this.private = data.private
+  this.deleted = data.deleted
   this.live = data.live
   this.stream = data.stream
   this.premiere = data.premiere

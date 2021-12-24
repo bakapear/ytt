@@ -77,11 +77,13 @@ async function fetchVideos (next, data) {
       }))
     } else {
       let title = util.text(vid.title)
+      let type = title.match(/\[(.*?) /)[1].toLowerCase()
       res.push(new YoutubeVideo({
         id: vid.videoId,
-        thumbnail: vid.thumbnail.thumbnails,
+        [type]: true,
         title: title,
-        index: util.num(vid.index)
+        index: util.num(vid.index),
+        thumbnail: vid.thumbnail.thumbnails
       }))
     }
   }
