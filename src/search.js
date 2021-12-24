@@ -64,7 +64,8 @@ async function fetchResults (next, data) {
         res.push(new YoutubeVideo({
           id: vid.videoId,
           type: 'public',
-          live: live,
+          live: live || null,
+          stream: live || util.text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
           labels: vid.badges?.map(x => x.metadataBadgeRenderer.label),
           thumbnail: vid.thumbnail.thumbnails,
           title: util.text(vid.title),

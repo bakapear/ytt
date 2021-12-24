@@ -13,6 +13,8 @@ function YoutubeVideo (data) {
   this.index = data.index
   this.type = data.type
   this.live = data.live
+  this.stream = data.stream
+  this.premiere = data.premiere
   this.title = data.title
   this.description = data.description
   this.duration = data.duration

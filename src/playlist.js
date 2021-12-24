@@ -63,7 +63,8 @@ async function fetchVideos (next, data) {
       let live = !vid.lengthSeconds
       res.push(new YoutubeVideo({
         id: vid.videoId,
-        live: live,
+        live: !vid.lengthSeconds || null,
+        stream: !vid.lengthSeconds || null,
         type: 'public',
         thumbnail: vid.thumbnail.thumbnails,
         title: util.text(vid.title),
