@@ -31,8 +31,8 @@ function makePlaylistObject (data) {
     type: micro.unlisted ? 'unlisted' : 'public',
     title: micro.title,
     description: micro.description,
-    size: util.num(info.stats[0]),
-    views: util.num(info.stats[1]),
+    size: util.num(info.stats[0]) || 0,
+    views: util.num(info.stats[1]) || 0,
     date: util.date(info.stats[2]),
     thumbnail: micro.thumbnail.thumbnails,
     channel: {
@@ -60,7 +60,6 @@ async function fetchVideos (next, data) {
     let vid = item.playlistVideoRenderer
     let owner = vid.shortBylineText?.runs[0]
     if (owner) {
-      let live = !vid.lengthSeconds
       res.push(new YoutubeVideo({
         id: vid.videoId,
         live: !vid.lengthSeconds || null,
@@ -69,7 +68,7 @@ async function fetchVideos (next, data) {
         thumbnail: vid.thumbnail.thumbnails,
         title: util.text(vid.title),
         index: util.num(vid.index),
-        duration: live ? 0 : (Number(vid.lengthSeconds) * 1000),
+        duration: Number(vid.lengthSeconds) * 1000 || 0,
         channel: {
           id: owner.navigationEndpoint.browseEndpoint.browseId,
           legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
