@@ -2,7 +2,7 @@ let { YoutubeChannel } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
-module.exports = async (channelId, opts = {}) => {
+module.exports = async (channelId) => {
   if (typeof channelId !== 'string') throw Error('Invalid value')
 
   let body = await req.api('browse', { browseId: channelId, params: genToken('about') })
