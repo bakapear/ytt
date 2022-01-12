@@ -1,4 +1,4 @@
-let { YoutubeVideo } = require('./lib/structs')
+let { YoutubeVideo, YoutubePlaylist, YoutubeMix } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -146,7 +146,7 @@ async function fetchRelated (next, data) {
     switch (key) {
       case 'compactVideoRenderer': {
         let vid = item[key]
-        let owner = vid.shortBylineText?.runs[0]
+        let owner = vid.shortBylineText.runs[0]
         let live = !!vid.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_LIVE_NOW')
         res.push(new YoutubeVideo({
           id: vid.videoId,
@@ -167,6 +167,33 @@ async function fetchRelated (next, data) {
             title: owner.text,
             avatar: vid.channelThumbnail.thumbnails
           }
+        }))
+        break
+      }
+      case 'compactPlaylistRenderer': {
+        let list = item[key]
+        let owner = list.shortBylineText.runs[0]
+        res.push(new YoutubePlaylist({
+          id: list.playlistId,
+          title: util.text(list.title),
+          thumbnail: list.thumbnail.thumbnails,
+          size: util.num(list.videoCountShortText),
+          date: util.date(list.publishedTimeText),
+          channel: {
+            id: owner.navigationEndpoint.browseEndpoint.browseId,
+            legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+            custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+            title: owner.text
+          }
+        }))
+        break
+      }
+      case 'compactRadioRenderer': {
+        let mix = item[key]
+        res.push(new YoutubeMix({
+          id: mix.playlistId,
+          title: util.text(mix.title),
+          thumbnail: mix.thumbnail.thumbnails
         }))
         break
       }
