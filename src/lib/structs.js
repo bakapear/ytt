@@ -73,6 +73,14 @@ function YoutubePlaylist (data) {
   if (data.videos) next.call(this, data, 'videos')
 }
 
+function YoutubeMix (data) {
+  this.id = data.id
+  this.title = data.title
+  if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
+
+  if (data.videos) next.call(this, data, 'videos') // TODO
+}
+
 function YoutubeFormats (data) {
   // TODO: add cool methods
   this.url = data[0].url
@@ -152,4 +160,4 @@ function YoutubeSong (data) {
   if (data.channel) this.channel = new YoutubeChannel(data.channel)
 }
 
-module.exports = { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist, YoutubeFormats, YoutubeTranscript, YoutubeComment }
+module.exports = { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist, YoutubeMix, YoutubeFormats, YoutubeTranscript, YoutubeComment }
