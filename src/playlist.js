@@ -24,7 +24,7 @@ function makePlaylistObject (data) {
   let items = data.sidebar.playlistSidebarRenderer.items
 
   let info = items[0].playlistSidebarPrimaryInfoRenderer
-  let owner = items[1].playlistSidebarSecondaryInfoRenderer.videoOwner.videoOwnerRenderer
+  let owner = items[1]?.playlistSidebarSecondaryInfoRenderer.videoOwner.videoOwnerRenderer
 
   return new YoutubePlaylist({
     id: util.between(micro.urlCanonical, '='),
@@ -35,13 +35,15 @@ function makePlaylistObject (data) {
     views: util.num(info.stats[1]) || 0,
     date: util.date(info.stats[2]),
     thumbnail: micro.thumbnail.thumbnails,
-    channel: {
-      id: owner.navigationEndpoint.browseEndpoint.browseId,
-      legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
-      custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
-      title: util.text(owner.title),
-      avatar: owner.thumbnail.thumbnails
-    },
+    channel: owner
+      ? {
+          id: owner.navigationEndpoint.browseEndpoint.browseId,
+          legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+          custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+          title: util.text(owner.title),
+          avatar: owner.thumbnail.thumbnails
+        }
+      : null,
     videos: { fetch: fetchVideos, continuation: !!data.onResponseReceivedActions }
   })
 }
