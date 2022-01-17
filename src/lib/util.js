@@ -82,5 +82,28 @@ module.exports = {
         }
       }
     })
+  },
+  async more (fn, data) {
+    let res = data ? await fn(null, data) : []
+
+    let items = res.items
+
+    Object.defineProperties(items, {
+      continuation: { value: res.continuation, enumerable: false, writable: true },
+      next: {
+        value: async (steps = 1) => {
+          let step = 0
+          let last = items.length
+          while (items.continuation && step++ < steps) {
+            let res = await fn(items.continuation)
+            items.continuation = res.continuation
+            items.push(...res.items)
+          }
+          return items.slice(last)
+        }
+      }
+    })
+
+    return items
   }
 }
