@@ -35,7 +35,7 @@ function makeVideoObject (data) {
 
   let ratings = details.allowRatings
 
-  let chapters = data.playerOverlays.playerOverlayRenderer.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer.playerBar.multiMarkersPlayerBarRenderer.markersMap[0].value.chapters
+  let chapters = data.playerOverlays.playerOverlayRenderer.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer.playerBar?.multiMarkersPlayerBarRenderer.markersMap[0].value.chapters
   if (chapters) {
     chapters = chapters.map(x => {
       let c = x.chapterRenderer
