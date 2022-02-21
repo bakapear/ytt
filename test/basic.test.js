@@ -18,7 +18,7 @@ let TESTS = [
   {
     method: 'playlist',
     instance: struct.YouTubePlaylist,
-    valid: ['PL0jp-uZ7a4g9FQWW5R_u0pz4yzV4RiOXu', 'PLNyF4u9mdcWp9u19YczK-aaQfsfj6QRWv', 'PLCEF5EEFA56A44606', 'PLmWYEDTNOGUL69D2wj9m2onBKV2s3uT5Y', 'PL6305F709EB481224', 'UUraDChjPs-r9FoNsmJufZZQ']
+    valid: ['PL0jp-uZ7a4g9FQWW5R_u0pz4yzV4RiOXu', 'PLNyF4u9mdcWp9u19YczK-aaQfsfj6QRWv', 'PLCEF5EEFA56A44606', 'PLmWYEDTNOGUL69D2wj9m2onBKV2s3uT5Y', 'PL6305F709EB481224', 'UU9ecwl3FTG66jIKA9JRDtmg']
   },
   {
     method: 'search',
