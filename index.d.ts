@@ -5,7 +5,6 @@ export declare function search(query: string, filters?: object): Promise<YouTube
 export declare function video(videoId: string): Promise<YouTubeVideo>
 export declare function channel(channelId: string): Promise<YouTubeChannel>
 export declare function playlist(playlistId: string, startIndex?: number): Promise<YouTubePlaylist>
-export declare function comments(videoId: string, commentId?: string): Promise<YouTubeComment[]>
 export declare function download(videoId: string): Promise<YouTubeFormats>
 export declare function transcript(videoId: string, lang?: string): Promise<YouTubeTranscript>
 export declare function complete(query: string, lang?: string): Promise<string[]>
