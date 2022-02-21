@@ -1,4 +1,4 @@
-let { YoutubeFormats } = require('./lib/structs')
+let { YouTubeFormats } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -16,7 +16,7 @@ module.exports = async (videoId) => {
 function makeFormatsObject (data) {
   let regex = /(?<=codecs=").*(?=")/
 
-  return new YoutubeFormats(data.map(format => {
+  return new YouTubeFormats(data.map(format => {
     let parts = format.mimeType.split(';')
     return {
       url: format.url,

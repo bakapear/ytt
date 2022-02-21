@@ -1,4 +1,4 @@
-let { YoutubeChannel, YoutubeVideo, YoutubePlaylist } = require('./lib/structs')
+let { YouTubeChannel, YouTubeVideo, YouTubePlaylist } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -45,7 +45,7 @@ function makeChannelObject (data) {
     let header = data.header.carouselHeaderRenderer
     if (!header) throw Error('Channel type not supported')
     header = data.header.carouselHeaderRenderer.contents[1].topicChannelDetailsRenderer
-    return new YoutubeChannel({
+    return new YouTubeChannel({
       id: data.contents.twoColumnBrowseResultsRenderer.tabs[0].tabRenderer.tabIdentifier,
       title: util.text(header.title),
       subscribers: util.num(header.subtitle),
@@ -63,7 +63,7 @@ function makeChannelObject (data) {
 
   let game = header.metadata ? util.text(header.metadata).split(' • ') : null
 
-  return new YoutubeChannel({
+  return new YouTubeChannel({
     id: util.between(micro.urlCanonical, '/channel/'),
     legacy: meta.doubleclickTrackingUsername || util.between(meta.vanityChannelUrl, '/user/'),
     custom: util.between(meta.vanityChannelUrl, '/c/'),
@@ -104,7 +104,7 @@ async function fetchContents (next, data) {
     switch (key) {
       case 'gridVideoRenderer': {
         let vid = item[key]
-        res.push(new YoutubeVideo({
+        res.push(new YouTubeVideo({
           id: vid.videoId,
           stream: util.text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
           labels: vid.badges?.map(x => x.metadataBadgeRenderer.label),
@@ -119,7 +119,7 @@ async function fetchContents (next, data) {
       }
       case 'gridPlaylistRenderer': {
         let list = item[key]
-        res.push(new YoutubePlaylist({
+        res.push(new YouTubePlaylist({
           id: list.playlistId,
           title: util.text(list.title),
           thumbnail: list.thumbnail.thumbnails,
@@ -129,7 +129,7 @@ async function fetchContents (next, data) {
       }
       case 'gridChannelRenderer': {
         let chan = item[key]
-        res.push(new YoutubeChannel({
+        res.push(new YouTubeChannel({
           id: chan.channelId,
           legacy: util.between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
           custom: util.between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),

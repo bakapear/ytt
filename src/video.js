@@ -1,4 +1,4 @@
-let { YoutubeVideo, YoutubePlaylist, YoutubeMix } = require('./lib/structs')
+let { YouTubeVideo, YouTubePlaylist, YouTubeMix } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -95,7 +95,7 @@ function makeVideoObject (data) {
       }
     }
   }
-  return new YoutubeVideo({
+  return new YouTubeVideo({
     id: details.videoId,
     live: views.isLive || null,
     stream: views.isLive || details.isLiveContent || null,
@@ -148,7 +148,7 @@ async function fetchRelated (next, data) {
         let vid = item[key]
         let owner = vid.shortBylineText.runs[0]
         let live = !!vid.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_LIVE_NOW')
-        res.push(new YoutubeVideo({
+        res.push(new YouTubeVideo({
           id: vid.videoId,
           live: live || null,
           stream: live || util.text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
@@ -173,7 +173,7 @@ async function fetchRelated (next, data) {
       case 'compactPlaylistRenderer': {
         let list = item[key]
         let owner = list.shortBylineText.runs[0]
-        res.push(new YoutubePlaylist({
+        res.push(new YouTubePlaylist({
           id: list.playlistId,
           title: util.text(list.title),
           thumbnail: list.thumbnail.thumbnails,
@@ -190,7 +190,7 @@ async function fetchRelated (next, data) {
       }
       case 'compactRadioRenderer': {
         let mix = item[key]
-        res.push(new YoutubeMix({
+        res.push(new YouTubeMix({
           id: mix.playlistId,
           title: util.text(mix.title),
           thumbnail: mix.thumbnail.thumbnails

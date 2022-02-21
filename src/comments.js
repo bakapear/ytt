@@ -1,4 +1,4 @@
-let { YoutubeComment } = require('./lib/structs')
+let { YouTubeComment } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -44,7 +44,7 @@ async function fetchComments (next) {
     let edit = date.indexOf('(edited)')
     if (edit !== -1) date = date.substr(0, edit)
 
-    res.push(new YoutubeComment({
+    res.push(new YouTubeComment({
       id: com.commentId,
       edited: edit >= 0,
       hearted: !!com.actionButtons.commentActionButtonsRenderer.creatorHeart,

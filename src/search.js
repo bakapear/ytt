@@ -1,4 +1,4 @@
-let { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist } = require('./lib/structs')
+let { YouTubeSearch, YouTubeVideo, YouTubeChannel, YouTubePlaylist } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -33,7 +33,7 @@ function makeSearchObject (data) {
   let suggested = items[0].didYouMeanRenderer?.correctedQuery
   let corrected = items[0].showingResultsForRenderer?.correctedQuery
 
-  return new YoutubeSearch({
+  return new YouTubeSearch({
     query: data.query,
     suggested: util.text(suggested),
     corrected: util.text(corrected),
@@ -61,7 +61,7 @@ async function fetchResults (next, data) {
         let vid = item[key]
         let owner = vid.ownerText.runs[0]
         let live = !!vid.badges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_LIVE_NOW')
-        res.push(new YoutubeVideo({
+        res.push(new YouTubeVideo({
           id: vid.videoId,
           live: live || null,
           stream: live || util.text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
@@ -85,7 +85,7 @@ async function fetchResults (next, data) {
       }
       case 'channelRenderer': {
         let chan = item[key]
-        res.push(new YoutubeChannel({
+        res.push(new YouTubeChannel({
           id: chan.channelId,
           legacy: util.between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
           custom: util.between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
@@ -101,7 +101,7 @@ async function fetchResults (next, data) {
       case 'playlistRenderer': {
         let list = item[key]
         let owner = list.shortBylineText.runs[0]
-        res.push(new YoutubePlaylist({
+        res.push(new YouTubePlaylist({
           id: list.playlistId,
           title: util.text(list.title),
           thumbnail: list.thumbnails[0].thumbnails,

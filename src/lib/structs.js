@@ -1,6 +1,6 @@
 let { next } = require('./util')
 
-function YoutubeSearch (data) {
+function YouTubeSearch (data) {
   this.query = data.query
   this.suggested = data.suggested
   this.corrected = data.corrected
@@ -8,7 +8,7 @@ function YoutubeSearch (data) {
   if (data.results) next.call(this, data, 'results')
 }
 
-function YoutubeVideo (data) {
+function YouTubeVideo (data) {
   this.id = data.id
   this.index = data.index
   this.unlisted = data.unlisted
@@ -29,17 +29,17 @@ function YoutubeVideo (data) {
   this.tags = data.tags
   this.labels = data.labels
   this.comments = data.comments
-  if (data.chapters) this.chapters = data.chapters.map(x => new YoutubeChapter(x))
-  if (data.channel) this.channel = new YoutubeChannel(data.channel)
-  if (data.game) this.game = new YoutubeChannel(data.game)
-  if (data.topic) this.topic = new YoutubeChannel(data.topic)
-  if (data.songs) this.songs = data.songs.map(x => new YoutubeSong(x))
-  if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
+  if (data.chapters) this.chapters = data.chapters.map(x => new YouTubeChapter(x))
+  if (data.channel) this.channel = new YouTubeChannel(data.channel)
+  if (data.game) this.game = new YouTubeChannel(data.game)
+  if (data.topic) this.topic = new YouTubeChannel(data.topic)
+  if (data.songs) this.songs = data.songs.map(x => new YouTubeSong(x))
+  if (data.thumbnail) this.thumbnail = new YouTubeThumbnails(data.thumbnail)
 
   if (data.related) next.call(this, data, 'related')
 }
 
-function YoutubeChannel (data) {
+function YouTubeChannel (data) {
   this.id = data.id
   this.legacy = data.legacy
   this.custom = data.custom
@@ -55,11 +55,11 @@ function YoutubeChannel (data) {
   this.labels = data.labels
   this.year = data.year
   this.devs = data.devs
-  if (data.avatar) this.avatar = new YoutubeThumbnails(data.avatar)
-  if (data.banner) this.banner = new YoutubeThumbnails(data.banner)
+  if (data.avatar) this.avatar = new YouTubeThumbnails(data.avatar)
+  if (data.banner) this.banner = new YouTubeThumbnails(data.banner)
 }
 
-function YoutubePlaylist (data) {
+function YouTubePlaylist (data) {
   this.id = data.id
   this.unlisted = data.unlisted
   this.title = data.title
@@ -67,27 +67,27 @@ function YoutubePlaylist (data) {
   this.size = data.size
   this.views = data.views
   this.date = data.date
-  if (data.channel) this.channel = new YoutubeChannel(data.channel)
-  if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
+  if (data.channel) this.channel = new YouTubeChannel(data.channel)
+  if (data.thumbnail) this.thumbnail = new YouTubeThumbnails(data.thumbnail)
 
   if (data.videos) next.call(this, data, 'videos')
 }
 
-function YoutubeMix (data) {
+function YouTubeMix (data) {
   this.id = data.id
   this.title = data.title
-  if (data.thumbnail) this.thumbnail = new YoutubeThumbnails(data.thumbnail)
+  if (data.thumbnail) this.thumbnail = new YouTubeThumbnails(data.thumbnail)
 
   if (data.videos) next.call(this, data, 'videos') // TODO
 }
 
-function YoutubeFormats (data) {
+function YouTubeFormats (data) {
   // TODO: add cool methods
   this.url = data[0].url
-  this.formats = data.map(x => new YoutubeFormat(x))
+  this.formats = data.map(x => new YouTubeFormat(x))
 }
 
-function YoutubeFormat (data) {
+function YouTubeFormat (data) {
   this.itag = data.itag
   this.url = data.url
   this.mime = data.mime
@@ -103,20 +103,20 @@ function YoutubeFormat (data) {
   this.fps = data.fps
 }
 
-function YoutubeThumbnails (data) {
+function YouTubeThumbnails (data) {
   // TODO: add cool methods
   this.url = data[0].url
-  this.thumbnails = data.map(x => new YoutubeThumbnail(x))
+  this.thumbnails = data.map(x => new YouTubeThumbnail(x))
 }
 
-function YoutubeThumbnail (data) {
+function YouTubeThumbnail (data) {
   this.url = data.url
   this.width = data.width
   this.height = data.height
 }
 
-function YoutubeTranscript (data) {
-  this.cues = data.cues.map(x => new YoutubeTranscriptCue(x))
+function YouTubeTranscript (data) {
+  this.cues = data.cues.map(x => new YouTubeTranscriptCue(x))
   if (data.langs) this.langs = data.langs.map(x => new YouTubeTranscriptLanguage(x))
 }
 
@@ -126,13 +126,13 @@ function YouTubeTranscriptLanguage (data) {
   this.code = data.code
 }
 
-function YoutubeTranscriptCue (data) {
+function YouTubeTranscriptCue (data) {
   this.text = data.text
   this.duration = data.duration
   this.offset = data.offset
 }
 
-function YoutubeComment (data) {
+function YouTubeComment (data) {
   this.id = data.id
   this.edited = data.edited
   this.hearted = data.hearted
@@ -142,22 +142,22 @@ function YoutubeComment (data) {
   this.likes = data.likes
   this.date = data.date
   this.replies = data.replies
-  if (data.channel) this.channel = new YoutubeChannel(data.channel)
+  if (data.channel) this.channel = new YouTubeChannel(data.channel)
 }
 
-function YoutubeChapter (data) {
+function YouTubeChapter (data) {
   this.title = data.title
   this.offset = data.offset
-  this.thumbnail = new YoutubeThumbnails(data.thumbnail)
+  this.thumbnail = new YouTubeThumbnails(data.thumbnail)
 }
 
-function YoutubeSong (data) {
+function YouTubeSong (data) {
   this.title = data.title
   this.artist = data.artist
   this.album = data.album
   this.license = data.license
-  if (data.video) this.video = new YoutubeVideo(data.video)
-  if (data.channel) this.channel = new YoutubeChannel(data.channel)
+  if (data.video) this.video = new YouTubeVideo(data.video)
+  if (data.channel) this.channel = new YouTubeChannel(data.channel)
 }
 
-module.exports = { YoutubeSearch, YoutubeVideo, YoutubeChannel, YoutubePlaylist, YoutubeMix, YoutubeFormats, YoutubeTranscript, YoutubeComment }
+module.exports = { YouTubeSearch, YouTubeVideo, YouTubeChannel, YouTubePlaylist, YouTubeMix, YouTubeFormats, YouTubeTranscript, YouTubeComment }

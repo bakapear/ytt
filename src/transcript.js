@@ -1,4 +1,4 @@
-let { YoutubeTranscript } = require('./lib/structs')
+let { YouTubeTranscript } = require('./lib/structs')
 
 let util = require('./lib/util')
 let req = require('./lib/request')
@@ -39,7 +39,7 @@ function makeTranscriptObject (data) {
     })
   }
 
-  return new YoutubeTranscript({ langs, cues: items })
+  return new YouTubeTranscript({ langs, cues: items })
 }
 
 function getLangFromToken (token) {

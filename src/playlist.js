@@ -1,4 +1,4 @@
-let { YoutubeVideo, YoutubePlaylist } = require('./lib/structs')
+let { YouTubeVideo, YouTubePlaylist } = require('./lib/structs')
 let util = require('./lib/util')
 let req = require('./lib/request')
 
@@ -26,7 +26,7 @@ function makePlaylistObject (data) {
   let info = items[0].playlistSidebarPrimaryInfoRenderer
   let owner = items[1]?.playlistSidebarSecondaryInfoRenderer.videoOwner.videoOwnerRenderer
 
-  return new YoutubePlaylist({
+  return new YouTubePlaylist({
     id: util.between(micro.urlCanonical, '='),
     unlisted: micro.unlisted || null,
     title: micro.title,
@@ -62,7 +62,7 @@ async function fetchVideos (next, data) {
     let vid = item.playlistVideoRenderer
     let owner = vid.shortBylineText?.runs[0]
     if (owner) {
-      res.push(new YoutubeVideo({
+      res.push(new YouTubeVideo({
         id: vid.videoId,
         live: !vid.lengthSeconds || null,
         stream: !vid.lengthSeconds || null,
@@ -80,7 +80,7 @@ async function fetchVideos (next, data) {
     } else {
       let title = util.text(vid.title)
       let type = title.match(/\[(.*?) /)[1].toLowerCase()
-      res.push(new YoutubeVideo({
+      res.push(new YouTubeVideo({
         id: vid.videoId,
         [type]: true,
         title: title,
