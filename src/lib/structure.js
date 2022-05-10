@@ -39,8 +39,8 @@ function YoutubeVideo (data) {
     views: data.views,
     duration: data.duration || 0,
     date: data.date,
-    likes: data.likes,
-    dislikes: data.dislikes
+    likes: data.likes
+    // dislikes: data.dislikes
   }
   this.thumbnail = data.thumbnail
   this.author = data.author

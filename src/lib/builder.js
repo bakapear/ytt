@@ -104,7 +104,7 @@ function makeVideoObject (data) {
     views: util.num(primary.viewCount.videoViewCountRenderer.viewCount),
     date: util.date(util.text(primary.dateText)),
     likes: util.num(primary.videoActions.menuRenderer.topLevelButtons[0].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label),
-    dislikes: util.num(primary.videoActions.menuRenderer.topLevelButtons[1].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label),
+    // dislikes: util.num(primary.videoActions.menuRenderer.topLevelButtons[1].toggleButtonRenderer.defaultText.accessibility.accessibilityData.label),
     duration: util.hmsToMs(util.text(time.text)),
     thumbnail: new YoutubeThumbnail(main.thumbnail.thumbnails[0]),
     author: new YoutubeChannel({
