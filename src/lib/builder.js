@@ -20,7 +20,7 @@ function makePlaylistObject (data) {
           index: Number(util.text(item.index)),
           type: title.indexOf('Deleted') >= 0 ? 'deleted' : 'private',
           id: item.videoId,
-          title: title
+          title
         }))
         continue
       }
@@ -28,7 +28,7 @@ function makePlaylistObject (data) {
       items.push(new YoutubeVideo({
         index: Number(util.text(item.index)),
         id: item.videoId,
-        title: title,
+        title,
         duration: Number(item.lengthSeconds) * 1000,
         thumbnail: new YoutubeThumbnail(item.thumbnail.thumbnails[0]),
         author: new YoutubeChannel({
@@ -51,11 +51,11 @@ function makePlaylistObject (data) {
     thumbnail: new YoutubeThumbnail(micro.thumbnail.thumbnails[0]),
     author: owner
       ? new YoutubeChannel({
-          id: owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
-          vanity: util.between(url, '/user/'),
-          title: util.text(owner.videoOwnerRenderer.title),
-          thumbnail: new YoutubeThumbnail(owner.videoOwnerRenderer.thumbnail.thumbnails[0])
-        })
+        id: owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId,
+        vanity: util.between(url, '/user/'),
+        title: util.text(owner.videoOwnerRenderer.title),
+        thumbnail: new YoutubeThumbnail(owner.videoOwnerRenderer.thumbnail.thumbnails[0])
+      })
       : null,
     continuation: continuation ? continuation.continuationEndpoint.continuationCommand.token : null,
     fetch: async x => {
@@ -120,7 +120,7 @@ function makeVideoObject (data) {
 }
 
 function makeQueryObject (data) {
-  let query = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.subMenu.searchSubMenuRenderer.groups[4].searchFilterGroupRenderer.filters[1].searchFilterRenderer.navigationEndpoint.searchEndpoint.query
+  let query = data.header.searchHeaderRenderer.searchFilterButton.buttonRenderer.command.openPopupAction.popup.searchFilterOptionsDialogRenderer.groups[0].searchFilterGroupRenderer.filters[0].searchFilterRenderer.navigationEndpoint.searchEndpoint.query
   let sections = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
   let main = util.findLastWithKey(sections, 'itemSectionRenderer')
   let continuation = util.findWithKey(sections, 'continuationItemRenderer')
@@ -187,7 +187,7 @@ function makeQueryObject (data) {
   }
 
   let search = new YoutubeQuery({
-    query: query,
+    query,
     results: Number(data.estimatedResults),
     corrected: (main.contents.length && main.contents[0].didYouMeanRenderer) ? util.text(main.contents[0].didYouMeanRenderer.correctedQuery) : null,
     items: formatItems(main.contents),
