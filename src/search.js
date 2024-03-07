@@ -50,7 +50,7 @@ async function fetchResults (next, data) {
     contents = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems
   } else contents = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
 
-  let items = contents[0].itemSectionRenderer.contents
+  let items = contents[contents.length - 2].itemSectionRenderer.contents
   let token = contents[contents.length - 1].continuationItemRenderer?.continuationEndpoint.continuationCommand.token
 
   let res = []
