@@ -27,7 +27,6 @@ export function YouTubeVideo (data) {
   this.viewers = data.viewers
   this.date = data.date
   this.likes = data.likes
-  this.dislikes = data.dislikes
   this.category = data.category
   this.tags = data.tags
   this.labels = data.labels
@@ -39,6 +38,8 @@ export function YouTubeVideo (data) {
   if (data.songs) this.songs = data.songs.map(x => new YouTubeSong(x))
   if (data.thumbnail) this.thumbnail = new YouTubeThumbnails(data.thumbnail)
 
+  /** @type YouTubeVideo[] | YouTubePlaylist[] | YouTubeMix[] */
+  this.related = []
   if (data.related) next.call(this, data, 'related')
 }
 

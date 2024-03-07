@@ -2,7 +2,7 @@ import { YouTubeVideo, YouTubePlaylist, YouTubeMix, YouTubeComment } from './lib
 import { removeEmpty, text, stb, next, num, date, between, time } from './lib/util.js'
 import { api } from './lib/request.js'
 
-export default async (videoId) => {
+let video = async (videoId) => {
   if (typeof videoId !== 'string') throw Error('Invalid value')
 
   let player = await api('player', { videoId })
@@ -23,7 +23,7 @@ export default async (videoId) => {
   return removeEmpty(video)
 }
 
-export let comments = async (videoId, commentId) => {
+video.comments = async (videoId, commentId) => {
   if (typeof videoId !== 'string') throw Error('Invalid value')
 
   let sortType = 0
@@ -42,6 +42,8 @@ export let comments = async (videoId, commentId) => {
   return out.items
 }
 
+export default video
+
 function makeVideoObject (data) {
   let details = data.videoDetails
   let micro = data.microformat.playerMicroformatRenderer
@@ -52,9 +54,12 @@ function makeVideoObject (data) {
   let owner = secondary.owner.videoOwnerRenderer
   let views = primary.viewCount.videoViewCountRenderer
 
-  let ratings = details.allowRatings
+  let comments = contents[3].itemSectionRenderer.contents[0].commentsEntryPointHeaderRenderer.commentCount.simpleText
 
-  let chapters = data.playerOverlays.playerOverlayRenderer.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer.playerBar?.multiMarkersPlayerBarRenderer.markersMap[0].value.chapters
+  let ratings = details.allowRatings
+  let likes = buttons[0].segmentedLikeDislikeButtonViewModel.likeButtonViewModel.likeButtonViewModel.toggleButtonViewModel.toggleButtonViewModel.defaultButtonViewModel.buttonViewModel.accessibilityText
+
+  let chapters = data.playerOverlays.playerOverlayRenderer.decoratedPlayerBarRenderer?.decoratedPlayerBarRenderer.playerBar?.multiMarkersPlayerBarRenderer.markersMap?.[0].value.chapters
   if (chapters) {
     chapters = chapters.map(x => {
       let c = x.chapterRenderer
@@ -114,6 +119,7 @@ function makeVideoObject (data) {
       }
     }
   }
+
   return new YouTubeVideo({
     id: details.videoId,
     live: views.isLive || null,
@@ -126,12 +132,11 @@ function makeVideoObject (data) {
     duration: Number(details.lengthSeconds) * 1000,
     views: Number(details.viewCount),
     viewers: views.isLive ? num(views.viewCount) : null,
-    likes: num(buttons[0].toggleButtonRenderer.defaultText.accessibility?.accessibilityData.label) || (ratings ? 0 : null),
-    dislikes: num(buttons[1].toggleButtonRenderer.defaultText.accessibility?.accessibilityData.label) || (ratings ? 0 : null),
+    likes: num(between(likes, 'with', 'other', -1, 1)) || (ratings ? 0 : null),
     category: micro.category,
     tags: details.keywords,
     date: date(primary.dateText),
-    // comments, // TODO: generate request that includes comment size
+    comments: num(comments),
     channel: {
       id: owner.navigationEndpoint.browseEndpoint.browseId,
       legacy: between(micro.ownerProfileUrl, '/user/'),
@@ -258,12 +263,12 @@ async function fetchComments (next) {
   let res = []
 
   for (let item of contents) {
-    let com = item.commentThreadRenderer?.comment.commentRenderer || item.commentRenderer
+    let com = item.commentThreadRenderer?.comment?.commentRenderer || item.commentRenderer
     if (!com) continue
 
-    let date = text(com.publishedTimeText)
-    let edit = date.indexOf('(edited)')
-    if (edit !== -1) date = date.substr(0, edit)
+    let time = text(com.publishedTimeText)
+    let edit = time.indexOf('(edited)')
+    if (edit !== -1) time = time.substr(0, edit)
 
     res.push(new YouTubeComment({
       id: com.commentId,
@@ -273,7 +278,7 @@ async function fetchComments (next) {
       owner: com.authorIsChannelOwner,
       text: text(com.contentText),
       likes: num(com.voteCount),
-      date: date(date),
+      date: date(time),
       channel: {
         id: com.authorEndpoint.browseEndpoint.browseId,
         legacy: between(com.authorEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
