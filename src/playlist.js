@@ -1,52 +1,107 @@
-let dp = require('despair')
+let { YouTubeVideo, YouTubePlaylist } = require('./lib/structs')
 let util = require('./lib/util')
-let valid = require('./valid')
-let builder = require('./lib/builder')
+let req = require('./lib/request')
 
-module.exports = async function (id, opts = {}) {
-  id = await formatId(id, opts.title)
-  let data = await getPlaylistData(id)
-  let playlist = builder.makePlaylistObject(data)
-  let min = Number(opts.min)
-  let max = Number(opts.max)
-  if (opts.full === true) while (playlist.items.continuation) await playlist.items.more()
-  else {
-    if (!isNaN(min)) while (playlist.items.continuation && playlist.items.length < min) await playlist.items.more()
-    if (!isNaN(max)) if (playlist.items.length > max) playlist.items.length = max
+module.exports = async (playlistId, index) => {
+  if (typeof playlistId !== 'string') throw Error('Invalid value')
+
+  let body = await req.api('browse', { continuation: genToken(playlistId, index || 1) })
+  if (!body.contents) throw Error('Invalid playlist')
+
+  let list = makePlaylistObject(body)
+
+  if (list.videos) {
+    let res = await fetchVideos(null, body)
+    list.videos.push(...res.items)
+    list.videos.continuation = res.continuation
   }
-  return playlist
+
+  return util.removeEmpty(list)
 }
 
-async function formatId (id, title) {
-  if (Array.isArray(id)) {
-    for (let i = 0; i < id.length; i++) {
-      if (!await valid(id[i], 'video')) throw util.error(`Invalid video ID: '${id[i]}'`)
+function makePlaylistObject (data) {
+  let micro = data.microformat.microformatDataRenderer
+  let items = data.sidebar.playlistSidebarRenderer.items
+
+  let info = items[0].playlistSidebarPrimaryInfoRenderer
+  let owner = items[1]?.playlistSidebarSecondaryInfoRenderer.videoOwner.videoOwnerRenderer
+
+  return new YouTubePlaylist({
+    id: util.between(micro.urlCanonical, '='),
+    unlisted: micro.unlisted || null,
+    title: micro.title,
+    description: micro.description,
+    size: util.num(info.stats[0]) || 0,
+    views: util.num(info.stats[1]) || 0,
+    date: util.date(info.stats[2]),
+    thumbnail: micro.thumbnail.thumbnails,
+    channel: owner
+      ? {
+          id: owner.navigationEndpoint.browseEndpoint.browseId,
+          legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+          custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+          title: util.text(owner.title),
+          avatar: owner.thumbnail.thumbnails
+        }
+      : null,
+    videos: { fetch: fetchVideos, continuation: !!data.onResponseReceivedActions }
+  })
+}
+
+async function fetchVideos (next, data) {
+  if (!data) data = await req.api('browse', { continuation: next })
+
+  let contents = data.onResponseReceivedActions?.[0].appendContinuationItemsAction.continuationItems || []
+
+  let token = contents[contents.length - 1]?.continuationItemRenderer?.continuationEndpoint.continuationCommand.token
+
+  let res = []
+
+  for (let item of contents) {
+    if (!item.playlistVideoRenderer) continue
+    let vid = item.playlistVideoRenderer
+    let owner = vid.shortBylineText?.runs[0]
+    if (owner) {
+      res.push(new YouTubeVideo({
+        id: vid.videoId,
+        live: !vid.lengthSeconds || null,
+        stream: !vid.lengthSeconds || null,
+        thumbnail: vid.thumbnail.thumbnails,
+        title: util.text(vid.title),
+        index: util.num(vid.index),
+        duration: Number(vid.lengthSeconds) * 1000 || 0,
+        channel: {
+          id: owner.navigationEndpoint.browseEndpoint.browseId,
+          legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+          custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+          title: owner.text
+        }
+      }))
+    } else {
+      let title = util.text(vid.title)
+      let type = title.match(/\[(.*?) /)[1].toLowerCase()
+      res.push(new YouTubeVideo({
+        id: vid.videoId,
+        [type]: true,
+        title: title,
+        index: util.num(vid.index),
+        thumbnail: vid.thumbnail.thumbnails
+      }))
     }
-    id = await getPlaylistLink(id, title)
-  } else if (!await valid(id, 'playlist')) throw util.error(`Invalid playlist ID: ${id}`)
-  return id
+  }
+
+  return { items: util.removeEmpty(res), continuation: token || null }
 }
 
-async function getPlaylistData (id, retries = 5) {
-  if (retries <= 0) throw util.error('Failed to fetch the YouTube page properly!')
-  let body = await dp('playlist', {
-    base: util.base,
-    headers: { 'Accept-Language': 'en-US' },
-    query: { list: id }
-  }).text()
-  body = util.parse(body)
-  try { body = JSON.parse(body) } catch (e) { return getPlaylistData(id, --retries) }
-  return body
-}
-
-async function getPlaylistLink (ids, title, retries = 5) {
-  if (retries <= 0) throw util.error('Failed to fetch the YouTube page properly!')
-  let body = await dp('watch_videos', {
-    base: util.base,
-    headers: { 'Accept-Language': 'en-US' },
-    query: { video_ids: ids, title: title }
-  }).text()
-  body = util.parse(body)
-  try { body = JSON.parse(body) } catch (e) { return getPlaylistLink(ids, title, --retries) }
-  return body.currentVideoEndpoint.watchEndpoint.playlistId
+function genToken (id, i = 1) {
+  i = i <= 0 ? 0 : (i - 1)
+  let g = [194, 6, 2, 8, 0] // include unavailable videos
+  let f = [i % 128, Math.floor(i / 128)]
+  f[1] > 0 ? f[0] += 128 : f.pop()
+  let e = Buffer.from([8, ...f]).toString('base64')
+  let d = [80, 84, 58, ...Buffer.from(e)]
+  let c = Buffer.from([8, 0, 122, ...util.stb(d), ...g]).toString('base64')
+  let b = [18, ...util.stb('VL' + id), 26, ...util.stb(encodeURIComponent(c)), 154, 2, ...util.stb(id)]
+  let a = [226, 169, 133, 178, 2, ...util.stb(b)]
+  return Buffer.from(a).toString('base64')
 }

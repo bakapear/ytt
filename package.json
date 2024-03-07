@@ -1,10 +1,11 @@
 {
   "name": "ytt",
-  "version": "2.2.2",
+  "version": "3.0.0",
   "description": "YouTubeTools",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "lint": "standardx --fix"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,7 @@
     "video",
     "channel",
     "playlist",
-    "query",
+    "search",
     "api"
   ],
   "author": "bakapear",
@@ -25,7 +26,19 @@
     "url": "https://github.com/bakapear/ytt/issues"
   },
   "homepage": "https://github.com/bakapear/ytt#readme",
-  "dependencies": {
-    "despair": "^2.1.2"
+  "devDependencies": {
+    "@types/jest": "^27.0.2",
+    "jest": "^27.3.1",
+    "standardx": "^7.0.0"
+  },
+  "standardx": {
+    "env": [
+      "jest"
+    ]
+  },
+  "eslintConfig": {
+    "rules": {
+      "prefer-const": 0
+    }
   }
 }
