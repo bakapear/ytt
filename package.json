@@ -3,10 +3,6 @@
   "version": "3.0.0",
   "description": "YouTubeTools",
   "main": "index.js",
-  "scripts": {
-    "test": "jest",
-    "lint": "standardx --fix"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bakapear/ytt.git"
@@ -25,20 +21,5 @@
   "bugs": {
     "url": "https://github.com/bakapear/ytt/issues"
   },
-  "homepage": "https://github.com/bakapear/ytt#readme",
-  "devDependencies": {
-    "@types/jest": "^27.0.2",
-    "jest": "^27.3.1",
-    "standardx": "^7.0.0"
-  },
-  "standardx": {
-    "env": [
-      "jest"
-    ]
-  },
-  "eslintConfig": {
-    "rules": {
-      "prefer-const": 0
-    }
-  }
+  "homepage": "https://github.com/bakapear/ytt#readme"
 }
