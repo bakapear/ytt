@@ -5,6 +5,9 @@ export function YouTubeSearch (data) {
   this.suggested = data.suggested
   this.corrected = data.corrected
   this.size = data.size
+
+  /** @type YouTubeVideo[] | YouTubePlaylist[] | YouTubeChannel[] */
+  this.results = []
   if (data.results) next.call(this, data, 'results')
 }
 
