@@ -1,14 +1,14 @@
-let util = require('./lib/util')
-let req = require('./lib/request')
+import { isEmpty, removeEmpty } from './lib/util.js'
+import { base, api } from './lib/request.js'
 
 // Explanation here: https://regex101.com/r/OJo8wb/1
 let REGEX = /(?:https?:\/\/)?(?:www\.)?youtu(?:\.be|(?:be|be-nocookie)\.com)\/(?:(?<=\.be\/)([a-zA-Z0-9-_]{11}))?(?:(?:vi|v(?:ideo)?|e(?:mbed)?)\/([a-zA-Z0-9-_]{11}))?(?:(?=.*?[?&]v=([a-zA-Z0-9-_]{11}))|)(?:(?=.*?[?&]list=([a-zA-Z0-9-_]{2,35}))|)(?:(?=(?:c|user)\/([a-zA-Z0-9-_]+))|)(?:(?=channel\/([a-zA-Z0-9-_]+))|)/
 
-module.exports = async (value, fast) => {
+export default async (value, fast) => {
   if (typeof value !== 'string') throw Error('Invalid value')
 
   value = value.trim()
-  if (value.match(/^\/\w/)) value = req.base + value
+  if (value.match(/^\/\w/)) value = base + value
   let res = {}
 
   let match = value.match(REGEX)
@@ -21,11 +21,11 @@ module.exports = async (value, fast) => {
     }
   } else res.query = value
 
-  if (!fast && (res.name || util.isEmpty(res, true))) {
+  if (!fast && (res.name || isEmpty(res, true))) {
     let last = value
     let i = 0
     while (last) {
-      let body = await req.api('navigation/resolve_url', { url: value })
+      let body = await api('navigation/resolve_url', { url: value })
       if (!body) return null
       value = body.endpoint.urlEndpoint?.url
       if (!value) {
@@ -48,5 +48,5 @@ module.exports = async (value, fast) => {
     }
   }
 
-  return util.removeEmpty(res)
+  return removeEmpty(res)
 }

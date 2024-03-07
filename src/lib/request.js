@@ -1,8 +1,9 @@
-let https = require('https')
-let util = require('./util')
+import https from 'https'
+import { extend } from './util.js'
 
-module.exports = {
-  base: 'https://www.youtube.com/',
+export let base = 'https://www.youtube.com/'
+
+let o = {
   path: 'youtubei/v1/',
   key: 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8',
   agent: 'AppleWebKit Chrome/96',
@@ -14,33 +15,36 @@ module.exports = {
       clientVersion: '2.21111111',
       clientScreen: 'EMBED'
     },
-    thirdParty: { embedUrl: 'https://www.youtube.com/' }
-  },
-  async head (url, query) {
-    return await request(url, {
-      method: 'HEAD',
-      base: this.base,
-      query
-    }).catch(e => null)
-  },
-  async text (url, query) {
-    return await request(url, {
-      method: 'GET',
-      headers: { 'User-Agent': this.agent },
-      base: this.base,
-      query,
-      raw: true
-    }).catch(e => null)
-  },
-  async api (type, data) {
-    return await request(type, {
-      method: 'POST',
-      headers: { 'User-Agent': this.agent },
-      base: this.base + this.path,
-      query: { key: this.key },
-      data: util.extend({ context: this.context }, data)
-    }).catch(e => null)
+    thirdParty: { embedUrl: base }
   }
+}
+
+export async function head (url, query) {
+  return await request(url, {
+    method: 'HEAD',
+    base,
+    query
+  }).catch(e => null)
+}
+
+export async function text (url, query) {
+  return await request(url, {
+    method: 'GET',
+    headers: { 'User-Agent': o.agent },
+    base,
+    query,
+    raw: true
+  }).catch(e => null)
+}
+
+export async function api (type, data) {
+  return await request(type, {
+    method: 'POST',
+    headers: { 'User-Agent': o.agent },
+    base: base + o.path,
+    query: { key: o.key },
+    data: extend({ context: o.context }, data)
+  }).catch(e => null)
 }
 
 function request (url, opts = {}) {

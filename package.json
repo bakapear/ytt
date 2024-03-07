@@ -3,6 +3,7 @@
   "version": "3.0.0",
   "description": "YouTubeTools",
   "main": "index.js",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bakapear/ytt.git"

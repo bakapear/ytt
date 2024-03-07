@@ -1,6 +1,6 @@
-let { next } = require('./util')
+import { next } from './util.js'
 
-function YouTubeSearch (data) {
+export function YouTubeSearch (data) {
   this.query = data.query
   this.suggested = data.suggested
   this.corrected = data.corrected
@@ -8,7 +8,7 @@ function YouTubeSearch (data) {
   if (data.results) next.call(this, data, 'results')
 }
 
-function YouTubeVideo (data) {
+export function YouTubeVideo (data) {
   this.id = data.id
   this.index = data.index
   this.unlisted = data.unlisted
@@ -39,7 +39,7 @@ function YouTubeVideo (data) {
   if (data.related) next.call(this, data, 'related')
 }
 
-function YouTubeChannel (data) {
+export function YouTubeChannel (data) {
   this.id = data.id
   this.legacy = data.legacy
   this.custom = data.custom
@@ -59,7 +59,7 @@ function YouTubeChannel (data) {
   if (data.banner) this.banner = new YouTubeThumbnails(data.banner)
 }
 
-function YouTubePlaylist (data) {
+export function YouTubePlaylist (data) {
   this.id = data.id
   this.unlisted = data.unlisted
   this.title = data.title
@@ -73,7 +73,7 @@ function YouTubePlaylist (data) {
   if (data.videos) next.call(this, data, 'videos')
 }
 
-function YouTubeMix (data) {
+export function YouTubeMix (data) {
   this.id = data.id
   this.title = data.title
   if (data.thumbnail) this.thumbnail = new YouTubeThumbnails(data.thumbnail)
@@ -81,13 +81,13 @@ function YouTubeMix (data) {
   if (data.videos) next.call(this, data, 'videos') // TODO
 }
 
-function YouTubeFormats (data) {
+export function YouTubeFormats (data) {
   // TODO: add cool methods
   this.url = data[0].url
   this.formats = data.map(x => new YouTubeFormat(x))
 }
 
-function YouTubeFormat (data) {
+export function YouTubeFormat (data) {
   this.itag = data.itag
   this.url = data.url
   this.mime = data.mime
@@ -103,36 +103,36 @@ function YouTubeFormat (data) {
   this.fps = data.fps
 }
 
-function YouTubeThumbnails (data) {
+export function YouTubeThumbnails (data) {
   // TODO: add cool methods
   this.url = data[0].url
   this.thumbnails = data.map(x => new YouTubeThumbnail(x))
 }
 
-function YouTubeThumbnail (data) {
+export function YouTubeThumbnail (data) {
   this.url = data.url
   this.width = data.width
   this.height = data.height
 }
 
-function YouTubeTranscript (data) {
+export function YouTubeTranscript (data) {
   this.cues = data.cues.map(x => new YouTubeTranscriptCue(x))
   if (data.langs) this.langs = data.langs.map(x => new YouTubeTranscriptLanguage(x))
 }
 
-function YouTubeTranscriptLanguage (data) {
+export function YouTubeTranscriptLanguage (data) {
   this.current = data.current
   this.title = data.title
   this.code = data.code
 }
 
-function YouTubeTranscriptCue (data) {
+export function YouTubeTranscriptCue (data) {
   this.text = data.text
   this.duration = data.duration
   this.offset = data.offset
 }
 
-function YouTubeComment (data) {
+export function YouTubeComment (data) {
   this.id = data.id
   this.edited = data.edited
   this.hearted = data.hearted
@@ -145,13 +145,13 @@ function YouTubeComment (data) {
   if (data.channel) this.channel = new YouTubeChannel(data.channel)
 }
 
-function YouTubeChapter (data) {
+export function YouTubeChapter (data) {
   this.title = data.title
   this.offset = data.offset
   this.thumbnail = new YouTubeThumbnails(data.thumbnail)
 }
 
-function YouTubeSong (data) {
+export function YouTubeSong (data) {
   this.title = data.title
   this.artist = data.artist
   this.album = data.album
@@ -159,5 +159,3 @@ function YouTubeSong (data) {
   if (data.video) this.video = new YouTubeVideo(data.video)
   if (data.channel) this.channel = new YouTubeChannel(data.channel)
 }
-
-module.exports = { YouTubeSearch, YouTubeVideo, YouTubeChannel, YouTubePlaylist, YouTubeMix, YouTubeFormats, YouTubeTranscript, YouTubeComment }

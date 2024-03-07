@@ -1,4 +1,4 @@
-import { YouTubeSearch, YouTubeVideo, YouTubeChannel, YouTubePlaylist, YouTubeFormats, YouTubeTranscript, YouTubeComment } from "./src/lib/structs";
+import { YouTubeSearch, YouTubeVideo, YouTubeChannel, YouTubePlaylist, YouTubeFormats, YouTubeTranscript } from './src/lib/structs.js'
 
 export declare function resolve(value: string) : Promise<object>
 export declare function search(query: string, filters?: object): Promise<YouTubeSearch>

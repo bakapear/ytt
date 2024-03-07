@@ -1,10 +1,8 @@
-module.exports = {
-  resolve: require('./src/resolve'),
-  search: require('./src/search'),
-  video: require('./src/video'),
-  channel: require('./src/channel'),
-  playlist: require('./src/playlist'),
-  download: require('./src/download'),
-  transcript: require('./src/transcript'),
-  complete: require('./src/complete')
-}
+export { default as resolve } from './src/resolve.js'
+export { default as search } from './src/search.js'
+export { default as video } from './src/video.js'
+export { default as channel } from './src/channel.js'
+export { default as playlist } from './src/playlist.js'
+export { default as download } from './src/download.js'
+export { default as transcript } from './src/transcript.js'
+export { default as complete } from './src/complete.js'

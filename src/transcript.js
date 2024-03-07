@@ -1,18 +1,17 @@
-let { YouTubeTranscript } = require('./lib/structs')
+import { YouTubeTranscript } from './lib/structs.js'
+import { removeEmpty, text, stb } from './lib/util.js'
+import { api } from './lib/request.js'
 
-let util = require('./lib/util')
-let req = require('./lib/request')
-
-module.exports = async (videoId, lang) => {
+export default async (videoId, lang) => {
   if (typeof videoId !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('get_transcript', { params: genToken(videoId, lang) })
+  let body = await api('get_transcript', { params: genToken(videoId, lang) })
   if (!body || videoId.length !== 11) throw Error('Invalid video')
   if (!body.actions) throw Error('Video does not have a transcript in that language')
 
   let trans = makeTranscriptObject(body)
 
-  return util.removeEmpty(trans)
+  return removeEmpty(trans)
 }
 
 function makeTranscriptObject (data) {
@@ -33,7 +32,7 @@ function makeTranscriptObject (data) {
   for (let t of trans) {
     let cue = t.transcriptCueGroupRenderer.cues[0].transcriptCueRenderer
     items.push({
-      text: util.text(cue.cue),
+      text: text(cue.cue),
       duration: Number(cue.durationMs),
       offset: Number(cue.startOffsetMs)
     })
@@ -50,14 +49,14 @@ function getLangFromToken (token) {
 }
 
 function genToken (id, lang) {
-  let a = [10, ...util.stb(id)]
+  let a = [10, ...stb(id)]
   if (lang) {
     if (lang.endsWith('-auto')) {
       lang = lang.slice(0, -5)
-      a.push(18, ...util.stb('asr'))
+      a.push(18, ...stb('asr'))
     }
-    let b = Buffer.from([10, 0, 18, ...util.stb(lang), 26, 0])
-    a.push(18, ...util.stb(b.toString('base64')))
+    let b = Buffer.from([10, 0, 18, ...stb(lang), 26, 0])
+    a.push(18, ...stb(b.toString('base64')))
   }
   return Buffer.from(a).toString('base64')
 }

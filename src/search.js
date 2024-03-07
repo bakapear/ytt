@@ -1,6 +1,6 @@
-let { YouTubeSearch, YouTubeVideo, YouTubeChannel, YouTubePlaylist } = require('./lib/structs')
-let util = require('./lib/util')
-let req = require('./lib/request')
+import { YouTubeSearch, YouTubeVideo, YouTubeChannel, YouTubePlaylist } from './lib/structs.js'
+import { removeEmpty, text, num, between, date, time } from './lib/util.js'
+import { api } from './lib/request.js'
 
 let FMAP = [64, 112, 32, 40, 48, 120, 208, 56, 200, 184, 72]
 let FILTERS = {
@@ -11,10 +11,10 @@ let FILTERS = {
   sort: ['relevance', 'rating', 'age', 'views']
 }
 
-module.exports = async (query, filters = {}) => {
+export default async (query, filters = {}) => {
   if (typeof query !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('search', { query, params: getFilterParams(filters) })
+  let body = await api('search', { query, params: getFilterParams(filters) })
   body.query = query
 
   let search = makeSearchObject(body)
@@ -23,7 +23,7 @@ module.exports = async (query, filters = {}) => {
   search.results.push(...res.items)
   search.results.continuation = res.continuation
 
-  return util.removeEmpty(search)
+  return removeEmpty(search)
 }
 
 function makeSearchObject (data) {
@@ -35,8 +35,8 @@ function makeSearchObject (data) {
 
   return new YouTubeSearch({
     query: data.query,
-    suggested: util.text(suggested),
-    corrected: util.text(corrected),
+    suggested: text(suggested),
+    corrected: text(corrected),
     size: Number(data.estimatedResults),
     results: { fetch: fetchResults, continuation: true }
   })
@@ -46,7 +46,7 @@ async function fetchResults (next, data) {
   let contents = null
 
   if (!data) {
-    data = await req.api('search', { continuation: next })
+    data = await api('search', { continuation: next })
     contents = data.onResponseReceivedCommands[0].appendContinuationItemsAction.continuationItems
   } else contents = data.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents
 
@@ -64,18 +64,18 @@ async function fetchResults (next, data) {
         res.push(new YouTubeVideo({
           id: vid.videoId,
           live: live || null,
-          stream: live || util.text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
+          stream: live || text(vid.publishedTimeText)?.indexOf('Stream') !== -1 || null,
           labels: vid.badges?.map(x => x.metadataBadgeRenderer.label),
           thumbnail: vid.thumbnail.thumbnails,
-          title: util.text(vid.title),
-          description: util.text(vid.detailedMetadataSnippets?.[0].snippetText),
-          date: util.date(vid.publishedTimeText),
-          duration: util.time(vid.lengthText),
-          [live ? 'viewers' : 'views']: util.num(vid.viewCountText) || 0,
+          title: text(vid.title),
+          description: text(vid.detailedMetadataSnippets?.[0].snippetText),
+          date: date(vid.publishedTimeText),
+          duration: time(vid.lengthText),
+          [live ? 'viewers' : 'views']: num(vid.viewCountText) || 0,
           channel: {
             id: owner.navigationEndpoint.browseEndpoint.browseId,
-            legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
-            custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+            legacy: between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+            custom: between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
             title: owner.text,
             avatar: vid.channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail.thumbnails,
             verified: !!vid.ownerBadges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED')
@@ -87,14 +87,14 @@ async function fetchResults (next, data) {
         let chan = item[key]
         res.push(new YouTubeChannel({
           id: chan.channelId,
-          legacy: util.between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
-          custom: util.between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
-          title: util.text(chan.title),
+          legacy: between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+          custom: between(chan.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+          title: text(chan.title),
           avatar: chan.thumbnail.thumbnails,
-          description: util.text(chan.descriptionSnippet),
-          size: util.num(chan.videoCountText),
+          description: text(chan.descriptionSnippet),
+          size: num(chan.videoCountText),
           verified: !!chan.ownerBadges?.some(x => x.metadataBadgeRenderer.style === 'BADGE_STYLE_TYPE_VERIFIED'),
-          subscribers: util.num(chan.subscriberCountText)
+          subscribers: num(chan.subscriberCountText)
         }))
         break
       }
@@ -103,13 +103,13 @@ async function fetchResults (next, data) {
         let owner = list.shortBylineText.runs[0]
         res.push(new YouTubePlaylist({
           id: list.playlistId,
-          title: util.text(list.title),
+          title: text(list.title),
           thumbnail: list.thumbnails[0].thumbnails,
           size: Number(list.videoCount),
           channel: {
             id: owner.navigationEndpoint.browseEndpoint.browseId,
-            legacy: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
-            custom: util.between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
+            legacy: between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
+            custom: between(owner.navigationEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
             title: owner.text
           }
         }))
@@ -118,7 +118,7 @@ async function fetchResults (next, data) {
     }
   }
 
-  return { items: util.removeEmpty(res), continuation: token || null }
+  return { items: removeEmpty(res), continuation: token || null }
 }
 
 function getFilterParams (filters) {

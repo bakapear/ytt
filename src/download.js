@@ -1,16 +1,16 @@
-let { YouTubeFormats } = require('./lib/structs')
-let util = require('./lib/util')
-let req = require('./lib/request')
+import { YouTubeFormats } from './lib/structs.js'
+import { removeEmpty } from './lib/util.js'
+import { api } from './lib/request.js'
 
-module.exports = async (videoId) => {
+export default async (videoId) => {
   if (typeof videoId !== 'string') throw Error('Invalid value')
 
-  let body = await req.api('player', { videoId: videoId, context: { client: { clientName: '3', clientVersion: '16.50' } } })
+  let body = await api('player', { videoId, context: { client: { clientName: '3', clientVersion: '16.50' } } })
   if (body.playabilityStatus.status !== 'OK') throw Error(body.playabilityStatus.reason)
 
   let formats = makeFormatsObject([...(body.streamingData.formats || []), ...(body.streamingData.adaptiveFormats || [])])
 
-  return util.removeEmpty(formats)
+  return removeEmpty(formats)
 }
 
 function makeFormatsObject (data) {
