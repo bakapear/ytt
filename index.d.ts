@@ -14,7 +14,6 @@ interface SearchFilters {
     sort: keyof typeof Sort
 }
 
-
 export declare function resolve(value: string) : Promise<object>
 export declare function search(query: string, filters?: SearchFilters): Promise<YouTubeSearch>
 export declare function video(videoId: string): Promise<YouTubeVideo>
