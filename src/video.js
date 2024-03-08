@@ -53,8 +53,8 @@ function makeVideoObject (data) {
   let buttons = primary.videoActions.menuRenderer.topLevelButtons
   let owner = secondary.owner.videoOwnerRenderer
   let views = primary.viewCount.videoViewCountRenderer
-
-  let comments = contents[2].itemSectionRenderer.contents[0].commentsEntryPointHeaderRenderer.commentCount.simpleText
+  let autoplay = data.playerOverlays.playerOverlayRenderer.autoplay.playerOverlayAutoplayRenderer
+  let comments = contents[2].itemSectionRenderer.contents[0].commentsEntryPointHeaderRenderer.commentCount
 
   let ratings = details.allowRatings
   let likes = buttons[0].segmentedLikeDislikeButtonViewModel.likeButtonViewModel.likeButtonViewModel.toggleButtonViewModel.toggleButtonViewModel.defaultButtonViewModel.buttonViewModel.accessibilityText
@@ -150,7 +150,20 @@ function makeVideoObject (data) {
     topic,
     songs: songs.length ? songs : null,
     chapters,
-    related: { fetch: fetchRelated, continuation: true }
+    related: { fetch: fetchRelated, continuation: true },
+    autoplay: {
+      id: autoplay.videoId,
+      title: text(autoplay.videoTitle),
+      thumbnail: autoplay.background.thumbnails,
+      duration: time(autoplay.thumbnailOverlays[0].thumbnailOverlayTimeStatusRenderer.text),
+      views: num(between(autoplay.videoTitle.accessibility.accessibilityData.label, '', 'views', -1).split(' ').pop()),
+      date: date(autoplay.publishedTimeText),
+      channel: {
+        id: autoplay.byline.runs[0].navigationEndpoint.browseEndpoint.browseId,
+        title: autoplay.byline.runs[0].text,
+        custom: autoplay.byline.runs[0].navigationEndpoint.browseEndpoint.canonicalBaseUrl.slice(1)
+      }
+    }
   })
 }
 
@@ -284,8 +297,7 @@ async function fetchComments (next) {
       channel: {
         id: com.authorEndpoint.browseEndpoint.browseId,
         legacy: between(com.authorEndpoint.commandMetadata.webCommandMetadata.url, '/user/'),
-        custom: between(com.authorEndpoint.commandMetadata.webCommandMetadata.url, '/c/'),
-        title: text(com.authorText),
+        custom: text(com.authorText),
         verified: !!com.authorCommentBadge,
         avatar: com.authorThumbnail.thumbnails
       },

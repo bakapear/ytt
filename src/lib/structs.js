@@ -38,9 +38,13 @@ export function YouTubeVideo (data) {
   if (data.songs) this.songs = data.songs.map(x => new YouTubeSong(x))
   if (data.thumbnail) this.thumbnail = new YouTubeThumbnails(data.thumbnail)
 
-  /** @type YouTubeVideo[] | YouTubePlaylist[] | YouTubeMix[] */
-  this.related = []
-  if (data.related) next.call(this, data, 'related')
+  if (data.related) {
+    /** @type YouTubeVideo[] | YouTubePlaylist[] | YouTubeMix[] */
+    this.related = []
+    next.call(this, data, 'related')
+  }
+
+  if (data.autoplay) this.autoplay = new YouTubeVideo(data.autoplay)
 }
 
 export function YouTubeChannel (data) {
