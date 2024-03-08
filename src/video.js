@@ -287,7 +287,7 @@ async function fetchComments (next) {
         verified: !!com.authorCommentBadge,
         avatar: com.authorThumbnail.thumbnails
       },
-      replies: num(item.commentThreadRenderer?.replies?.commentRepliesRenderer.viewReplies.buttonRenderer.text.runs[1]?.text)
+      replies: com.replyCount
     }))
   }
 
