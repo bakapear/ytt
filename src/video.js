@@ -270,6 +270,8 @@ async function fetchComments (next) {
     let edit = time.indexOf('(edited)')
     if (edit !== -1) time = time.substr(0, edit)
 
+    let likes = com.actionButtons.commentActionButtonsRenderer.likeButton.toggleButtonRenderer.accessibilityData.accessibilityData.label
+
     res.push(new YouTubeComment({
       id: com.commentId,
       edited: edit >= 0,
@@ -277,7 +279,7 @@ async function fetchComments (next) {
       pinned: !!com.pinnedCommentBadge,
       owner: com.authorIsChannelOwner,
       text: text(com.contentText),
-      likes: num(com.voteCount),
+      likes: num(between(likes, 'with', 'other', -1, 1)),
       date: date(time),
       channel: {
         id: com.authorEndpoint.browseEndpoint.browseId,
