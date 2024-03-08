@@ -54,7 +54,7 @@ function makeVideoObject (data) {
   let owner = secondary.owner.videoOwnerRenderer
   let views = primary.viewCount.videoViewCountRenderer
 
-  let comments = contents[3].itemSectionRenderer.contents[0].commentsEntryPointHeaderRenderer.commentCount.simpleText
+  let comments = contents[2].itemSectionRenderer.contents[0].commentsEntryPointHeaderRenderer.commentCount.simpleText
 
   let ratings = details.allowRatings
   let likes = buttons[0].segmentedLikeDislikeButtonViewModel.likeButtonViewModel.likeButtonViewModel.toggleButtonViewModel.toggleButtonViewModel.defaultButtonViewModel.buttonViewModel.accessibilityText
