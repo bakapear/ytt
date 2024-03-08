@@ -291,7 +291,7 @@ async function fetchComments (next) {
     }))
   }
 
-  let count = num(data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand?.continuationItems[0].commentsHeaderRenderer.commentsCount)
+  let count = num(data.onResponseReceivedEndpoints[0].reloadContinuationItemsCommand?.continuationItems[0].commentsHeaderRenderer.countText)
   if (count) this.size = count
 
   return { items: removeEmpty(res), continuation: token || null }
